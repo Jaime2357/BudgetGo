@@ -38,6 +38,37 @@ export type PlanExpenses = {
     paid_date: Date;
 }
 
+export type Transaction = {
+    id: number;
+    name: string;
+    type: string;
+    amount: number;
+    credited_to?: number | null;
+    withdrawn_from?: number | null;
+    deposited_to?: number | null;
+    transaction_date: Date;
+}
+
+export type RecIncome = {
+    id: number;
+    name: string;
+    type: string;
+    amount: number;
+    deposited_to: number;
+    received: boolean;
+    expected_date: number;
+}
+
+export type Income = {
+    id: number;
+    name: string;
+    type: string;
+    amount: number;
+    deposited_to: number;
+    received: boolean;
+    paid_date: Date;
+}
+
 async function getSaving(): Promise<SavingAccount[]> {
     const savings = await db.getAllAsync('SELECT * FROM saving_accounts');
     return savings as SavingAccount[];
@@ -68,11 +99,41 @@ async function getAllPlanned(): Promise<PlanExpenses[]> {
     return allPlanned as PlanExpenses[];
 };
 
+async function getAllTransactions(): Promise<Transaction[]> {
+    const AllTransactions = await db.getAllAsync('SELECT * FROM transactions ORDER BY transaction_date ASC;');
+    return AllTransactions as Transaction[];
+};
+
+async function getRecIncome(): Promise<RecIncome[]> {
+    const reqIncome = await db.getAllAsync('SELECT * FROM reccurring_income WHERE received = false ORDER BY expected_date ASC;');
+    return reqIncome as RecIncome[];
+};
+
+async function getAllRecIncome(): Promise<RecIncome[]> {
+    const reqAllIncome = await db.getAllAsync('SELECT * FROM reccurring_income ORDER BY expected_date ASC;');
+    return reqAllIncome as RecIncome[];
+};
+
+async function getIncome(): Promise<Income[]> {
+    const getIncome = await db.getAllAsync('SELECT * FROM income WHERE received = false ORDER BY paid_date ASC;');
+    return getIncome as Income[];
+};
+
+async function getAllIncome(): Promise<Income[]> {
+    const getAllIncome = await db.getAllAsync('SELECT * FROM income ORDER BY paid_date ASC;');
+    return getAllIncome as Income[];
+};
+
 export default {
     getSaving,
     getCredit,
     getRecExpenses,
     getPlanExpenses,
     getAllRecurring,
-    getAllPlanned
+    getAllPlanned,
+    getAllTransactions,
+    getRecIncome,
+    getAllRecIncome,
+    getIncome,
+    getAllIncome
 };

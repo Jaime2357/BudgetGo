@@ -64,7 +64,7 @@ const CardComponent: React.FC<CardProps> = ({ account }) => {
   )
 };
 
-const CARD_WIDTH = 275;
+const CARD_WIDTH = 340;
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   bannerText: {
     fontSize: 30,
-    fontFamily: 'Tektur-Head',
+    fontFamily: 'Tektur-Sub',
     color: 'white',
     fontWeight: 'bold',
     backgroundColor: '#00000080',
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   cardBodyText: {
     fontSize: 15,
-    fontFamily: 'Tektur',
+    fontFamily: 'Tektur-Sub',
     color: 'white',
     margin: 2,
   }

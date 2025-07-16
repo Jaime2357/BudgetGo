@@ -51,19 +51,29 @@ const initDB = async (): Promise<void> => {
       );`
     );
 
-    await db.execAsync('DROP TABLE income;')
-    await db.execAsync('DROP TABLE transactions;')
+    await db.execAsync(
+      `CREATE TABLE IF NOT EXISTS reccurring_income (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'Other',
+        amount NUMERIC NOT NULL DEFAULT 0,
+        deposited_to INTEGER NOT NULL,
+        received BOOLEAN DEFAULT 0,
+        expected_date INTEGER NOT NULL,
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
+      );`
+    );
 
     await db.execAsync(
       `CREATE TABLE IF NOT EXISTS income (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        type TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'Other',
         amount NUMERIC NOT NULL DEFAULT 0,
         deposited_to INTEGER NOT NULL,
         received BOOLEAN DEFAULT 0,
         paid_date DATE NOT NULL,
-        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id),
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
       );`
     );
 
@@ -79,7 +89,7 @@ const initDB = async (): Promise<void> => {
         transaction_date DATE NOT NULL,
         FOREIGN KEY (credited_to) REFERENCES credit_accounts(id),
         FOREIGN KEY (withdrawn_from) REFERENCES saving_accounts(id),
-        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id),
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
       );`
     );
   });

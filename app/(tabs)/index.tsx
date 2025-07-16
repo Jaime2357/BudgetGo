@@ -1,39 +1,43 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import CardCarousel from '../components/homeScreen/carouselComponent';
 import initDB from '../database/dbInit';
-import accountRequest, { CreditAccount, PlanExpenses, RecExpenses, SavingAccount } from '../database/dbReq';
-//import accountService from '../database/SQLiteService';
+import accountRequest, {
+  CreditAccount,
+  PlanExpenses,
+  RecExpenses,
+  RecIncome,
+  SavingAccount,
+} from '../database/dbReq';
 
 export default function HomeScreen() {
-
   useEffect(() => {
     async function setupAndFetch() {
+      await initDB();
 
-      await initDB(); // Ensure tables are created
-
-      //Temporary Service Function to Insert, Update and Delete Data
-      //const paidDate = new Date(2025, 6, 29)
-      //await accountService.insertExpense("July Food Budget", "Food", 50, false, paidDate); // Insert account
-
-      // Get all Table Data
       const saving = await accountRequest.getSaving();
       const credits = await accountRequest.getCredit();
       const recExpenses = await accountRequest.getRecExpenses();
       const planExpenses = await accountRequest.getPlanExpenses();
+      const recIncome = await accountRequest.getRecIncome();
 
-      // Set all Table Data
       setSavings(saving);
       setCredits(credits);
       setRecExpenses(recExpenses);
-      setPlanExpenses(planExpenses)
+      setPlanExpenses(planExpenses);
+      setRecIncome(recIncome);
 
-      // Set Current Month
       const thisMonth = new Date();
-      const monthName = thisMonth.toLocaleString('default', { month: 'long' }); 
-      setMonth(monthName)
+      const monthName = thisMonth.toLocaleString('default', { month: 'long' });
+      setMonth(monthName);
     }
     setupAndFetch();
   }, []);
@@ -41,13 +45,9 @@ export default function HomeScreen() {
   const [savings, setSavings] = useState<SavingAccount[]>([]);
   const [credits, setCredits] = useState<CreditAccount[]>([]);
   const [recExpenses, setRecExpenses] = useState<RecExpenses[]>([]);
-  const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([])
-
-  const [month, setMonth] = useState<string>("January")
-
-  // console.log("Savings: ", savings)
-  // console.log("Credits: ", credits)
-  // console.log("Expenses: ", recExpenses)
+  const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([]);
+  const [recIncome, setRecIncome] = useState<RecIncome[]>([]);
+  const [month, setMonth] = useState<string>('January');
 
   const savingKeys = ['blue', 'red'];
   const creditKeys = ['bofa', 'venmo'];
@@ -55,212 +55,239 @@ export default function HomeScreen() {
   const savingsWithImages = savings.map((item, idx) => ({
     ...item,
     type: 'savings' as const,
-    imageKey: savingKeys[idx % savingKeys.length], // Cycles through keys
+    imageKey: savingKeys[idx % savingKeys.length],
   }));
 
   const creditWithImages = credits.map((item, idx) => ({
     ...item,
     type: 'credit' as const,
-    imageKey: creditKeys[idx % creditKeys.length], // Cycles through keys
+    imageKey: creditKeys[idx % creditKeys.length],
   }));
 
-  function getReadableDate(date: Date){
+  function getReadableDate(date: Date) {
     const d = new Date(date);
-    const mm = String(d.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const yyyy = d.getFullYear();
     return `${mm}/${dd}/${yyyy}`;
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#1E1E1E' }} edges={['top']}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollableContainer}>
-
-        <View style={styles.islandBox}>
-          {savings.length === 0 ? (
-            <Text>No savings saved.</Text>
-          ) : (
-            <CardCarousel cardProp={savingsWithImages} />
-          )}
-        </View>
-
-        <View style={styles.islandBox}>
-          {credits.length === 0 ? (
-            <Text>No credit cards saved.</Text>
-          ) : (
-            <CardCarousel cardProp={creditWithImages} />
-          )}
-        </View>
-
-        <View style={styles.islandTable}>
-          {recExpenses.length === 0 ? (
-            <Text> No Expenses.</Text>
-          ) : (
-            <View>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>{month} Expenses</Text>
-              </View>
-
-              <ScrollView
-                nestedScrollEnabled
-                contentContainerStyle={{ paddingBottom: 40 }}
-                style={{ flexGrow: 1 }}
-              >
-                {recExpenses.map((expense) => (
-                  <View key={expense.id} style={styles.cardTableRow}>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                      <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        Due {expense.reccurring_date}th
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>
-                          Pay
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
+    // <ImageBackground
+    //   source={imageMap['background']}
+    //   style={{ flex: 1 }}
+    //   resizeMode="cover"
+    // >
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollableContainer}
+        >
+          {/* 👋 Welcome message */}
+          <View style={styles.welcomeHeader}>
+            <Text style={styles.welcomeText}>Welcome Back</Text>
+            <Text style={styles.welcomeSubtext}>Let&apos;s look at your finances</Text>
+          </View>
+          
+          <View style={styles.contentContainer}>
+            {/* 📦 Saving Accounts */}
+            <View style={styles.islandBox}>
+              {savings.length === 0 ? (
+                <Text>No savings saved.</Text>
+              ) : (
+                <CardCarousel cardProp={savingsWithImages} />
+              )}
             </View>
 
-          )}
-        </View>
-
-        <View style={styles.islandTable}>
-          {planExpenses.length === 0 ? (
-            <Text> No Expenses.</Text>
-          ) : (
-            <View>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>Planned Expenses </Text>
-              </View>
-
-              <ScrollView
-                nestedScrollEnabled
-                contentContainerStyle={{ paddingBottom: 40 }}
-                style={{ flexGrow: 1 }}
-              >
-                {planExpenses.map((expense) => (
-                  <View key={expense.id} style={styles.cardTableRow}>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                      <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        {getReadableDate(expense.paid_date)}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>
-                          Pay
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
+            {/* 💳 Credit Accounts */}
+            <View style={styles.islandBox}>
+              {credits.length === 0 ? (
+                <Text>No credit cards saved.</Text>
+              ) : (
+                <CardCarousel cardProp={creditWithImages} />
+              )}
             </View>
 
-          )}
-        </View>
+            {/* 🔁 Recurring Expenses */}
+            <View style={styles.islandTable}>
+              {recExpenses.length === 0 ? (
+                <Text>No Expenses.</Text>
+              ) : (
+                <>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardHeaderText}>{month} Expenses</Text>
+                  </View>
+                  {recExpenses.map((expense) => (
+                    <View key={expense.id} style={styles.cardTableRow}>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
+                        <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
+                      </View>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextRight}>
+                          Due {expense.reccurring_date}th
+                        </Text>
+                        <TouchableOpacity style={styles.tablePayButton}>
+                          <Text style={styles.tablePayButtonText}>Pay</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+            </View>
 
-      </ScrollView>
-    </SafeAreaView>
+            {/* 📅 Planned Expenses */}
+            <View style={styles.islandTable}>
+              {planExpenses.length === 0 ? (
+                <Text>No Expenses.</Text>
+              ) : (
+                <>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardHeaderText}>Planned Expenses</Text>
+                  </View>
+                  {planExpenses.map((expense) => (
+                    <View key={expense.id} style={styles.cardTableRow}>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
+                        <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
+                      </View>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextRight}>
+                          {getReadableDate(expense.paid_date)}
+                        </Text>
+                        <TouchableOpacity style={styles.tablePayButton}>
+                          <Text style={styles.tablePayButtonText}>Pay</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+            </View>
+
+            {/* 💸 Recurring Income */}
+            <View style={styles.islandTable}>
+              {recIncome.length === 0 ? (
+                <Text>No Income.</Text>
+              ) : (
+                <>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardHeaderText}>Recurring Income</Text>
+                  </View>
+                  {recIncome.map((income) => (
+                    <View key={income.id} style={styles.cardTableRow}>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextLeft}>{income.name}:</Text>
+                        <Text style={styles.cardRowTextLeft}>${income.amount}</Text>
+                      </View>
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextRight}>
+                          {income.expected_date}th
+                        </Text>
+                        {!income.received ? (
+                          <TouchableOpacity style={styles.tablePayButton}>
+                            <Text style={styles.tablePayButtonText}>Log</Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <Text style={styles.cardRowTextRight}>Received</Text>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    // </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E1E', // Fills the whole screen
+    backgroundColor: 'transparent',
   },
   scrollableContainer: {
-    flexGrow: 1,
-    //paddingTop: 40, // Offset below notification bar
-    justifyContent: 'center', // Vertically center if content is short
+    paddingTop: 24,
     alignItems: 'center',
-    paddingHorizontal: '10%',
-    paddingVertical: 20, // For bottom nav bar
+  },
+  contentContainer: {
+    backgroundColor: 'black',
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 20,
+    borderTopStartRadius: 30,
+    borderTopEndRadius: 30,
+    paddingBottom: 20
+  },
+  welcomeHeader: {
+    marginBottom: 25,
+    paddingVertical: 13,
+    fontFamily: 'Tektur-Sub',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    fontFamily: 'Tektur',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  welcomeSubtext: {
+    fontSize: 16,
+    color: '#ccc',
   },
   islandBox: {
-    backgroundColor: '#232323',
+    backgroundColor: 'rgba(35, 35, 35, 0.9)',
     borderColor: 'rgba(74, 144, 226, 0.18)',
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 10,
-    marginVertical: '5%',
+    marginVertical: 17,
     width: '90%',
-    aspectRatio: 1.25,
+    aspectRatio: 1.5,
     overflow: 'hidden',
     padding: '5%',
   },
   islandTable: {
-    backgroundColor: '#232323',
-    borderColor: 'rgba(74, 144, 226, 0.18)',
-    borderWidth: 1,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 10,
-    marginVertical: '5%',
+    backgroundColor: 'rgba(35, 35, 35, 0.9)',
+    borderRadius: 30,
+    marginVertical: 17,
     width: '90%',
-    aspectRatio: 1.25,
-    overflow: 'hidden'
-  },
-  cardContainer: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#1E1E1E',
-    borderColor: '#7a8899',
-    borderWidth: 0.5,
-    borderRadius: 5,
-    overflow: 'hidden'
-  },
-  cardBanner: {
-    width: '100%',
-    height: '60%',
-    justifyContent: 'center'
+    overflow: 'hidden',
   },
   cardHeader: {
-    paddingHorizontal: 17,
+    paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: 'rgba(74, 144, 226, 0.18)'
-  },
-  cardTableRow: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 13,
-    borderBottomWidth: 1,
-    borderBottomEndRadius: 1,
-    width: '95%',
-    borderBottomColor: 'white',
-    alignSelf: 'center',
-    flexDirection: 'row'
+    backgroundColor: 'rgba(74, 144, 226, 0.18)',
   },
   cardHeaderText: {
     fontSize: 20,
     fontFamily: 'Tektur-Head',
-    color: 'white'
+    color: 'white',
+  },
+  cardTableRow: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    width: '95%',
+    borderBottomColor: 'white',
+    alignSelf: 'center',
+    flexDirection: 'row',
   },
   cardRowTextLeft: {
     fontSize: 15,
     fontFamily: 'Tektur-Sub',
     color: 'white',
-    marginVertical: 2
+    marginVertical: 2,
   },
   cardRowTextRight: {
     fontSize: 15,
@@ -269,43 +296,20 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'right',
   },
-  bannerText: {
-    fontSize: 30,
-    fontFamily: 'Tektur-Head',
-    backgroundColor: '#000000c0',
-    color: 'white',
-    alignSelf: 'flex-start',
-    //width: '50%',
-    padding: '5%'
-  },
-  cardBodyHeading: {
-    fontSize: 20,
-    fontFamily: 'Tektur-Sub',
-    color: 'white',
-    textDecorationLine: 'underline',
-    margin: 2,
-  },
-  cardBodyText: {
-    fontSize: 15,
-    fontFamily: 'Tektur',
-    color: 'white',
-    margin: 2,
-  },
-  tablePayButton: { 
-    paddingVertical: 2, 
-    marginVertical: 2, 
-    width: '50%', 
-    height: '50%',                 
-    backgroundColor: 'rgba(74, 144, 226, 0.18)', 
-    borderRadius: 8, 
-    justifyContent: 'center', 
-    alignSelf: 'flex-end' 
+  tablePayButton: {
+    paddingVertical: 2,
+    marginVertical: 2,
+    width: '50%',
+    height: '50%',
+    backgroundColor: 'rgba(74, 144, 226, 0.18)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
   },
   tablePayButtonText: {
     color: 'white',
     fontSize: 12,
     fontFamily: 'Tektur-Sub',
     textAlign: 'center',
-    justifyContent: 'center'
-  }
+  },
 });

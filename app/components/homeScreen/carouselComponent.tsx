@@ -7,8 +7,8 @@ interface Props {
     cardProp: CardComponentProps[];
 }
 
-const CARD_WIDTH = 275;
-const CARD_SPACING = 15;
+const CARD_WIDTH = 340;
+const CARD_SPACING = 25;
 
 const CardCarousel: React.FC<Props> = ({ cardProp }) => (
     <View style={{ flex: 1, justifyContent: 'center' }}>
