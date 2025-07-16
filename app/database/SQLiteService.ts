@@ -1,25 +1,28 @@
 import db from './dbOpen';
 
-// Type definition
-export type SavingAccount = {
+export type PlanExpenses = {
   id: number;
   name: string;
-  balance: number;
-  threshold: number;
-  modifications: number;
-};
-
-async function insertAccount(name: string, balance: number, threshold: number, modifications: number): Promise<void> {
-  await db.runAsync(`INSERT INTO saving_accounts (name, balance, threshold, modifications) VALUES (?, ?, ?, ?)`,
-    [name, balance, threshold, modifications]);
+  type: string;
+  amount: number;
+  paid: boolean;
+  paid_date: Date;
 }
 
-async function getAccounts(): Promise<SavingAccount[]> {
-  const accounts = await db.getAllAsync('SELECT * FROM saving_accounts');
-  return accounts as SavingAccount[];
-};
+async function insertExpense(
+  name: string,
+  type: string,
+  amount: number,
+  paid: boolean,
+  paid_date: Date): Promise<void> {
+
+  const paid_date_str = paid_date.toISOString().slice(0, 19).replace('T', ' '); // "2025-07-15 22:15:00"
+
+  await db.runAsync(
+    `INSERT INTO planned_expenses (name, type, amount, paid, paid_date) VALUES (?, ?, ?, ?, ?)`,
+    [name, type, amount, paid, paid_date_str]);
+}
 
 export default {
-  insertAccount,
-  getAccounts
+  insertExpense
 };

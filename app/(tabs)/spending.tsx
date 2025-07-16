@@ -1,70 +1,38 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import CardCarousel from '../components/homeScreen/carouselComponent';
 import initDB from '../database/dbInit';
 import accountRequest, { CreditAccount, PlanExpenses, RecExpenses, SavingAccount } from '../database/dbReq';
-//import accountService from '../database/SQLiteService';
 
-export default function HomeScreen() {
+
+export default function SpendingScreen() {
 
   useEffect(() => {
     async function setupAndFetch() {
 
       await initDB(); // Ensure tables are created
 
-      //Temporary Service Function to Insert, Update and Delete Data
-      //const paidDate = new Date(2025, 6, 29)
-      //await accountService.insertExpense("July Food Budget", "Food", 50, false, paidDate); // Insert account
-
       // Get all Table Data
+      const credit = await accountRequest.getCredit();
       const saving = await accountRequest.getSaving();
-      const credits = await accountRequest.getCredit();
-      const recExpenses = await accountRequest.getRecExpenses();
-      const planExpenses = await accountRequest.getPlanExpenses();
+      const allReccuring = await accountRequest.getAllRecurring();
+      const allPLanned = await accountRequest.getAllPlanned();
 
       // Set all Table Data
-      setSavings(saving);
-      setCredits(credits);
-      setRecExpenses(recExpenses);
-      setPlanExpenses(planExpenses)
-
-      // Set Current Month
-      const thisMonth = new Date();
-      const monthName = thisMonth.toLocaleString('default', { month: 'long' }); 
-      setMonth(monthName)
+      setCredit(credit);
+      setSaving(saving);
+      setAllReccuring(allReccuring);
+      setAllPLanned(allPLanned)
     }
     setupAndFetch();
   }, []);
 
-  const [savings, setSavings] = useState<SavingAccount[]>([]);
-  const [credits, setCredits] = useState<CreditAccount[]>([]);
-  const [recExpenses, setRecExpenses] = useState<RecExpenses[]>([]);
-  const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([])
+  const [credit, setCredit] = useState<CreditAccount[]>([]);
+  const [saving, setSaving] = useState<SavingAccount[]>([])
+  const [allReccuring, setAllReccuring] = useState<RecExpenses[]>([]);
+  const [allPLanned, setAllPLanned] = useState<PlanExpenses[]>([])
 
-  const [month, setMonth] = useState<string>("January")
-
-  // console.log("Savings: ", savings)
-  // console.log("Credits: ", credits)
-  // console.log("Expenses: ", recExpenses)
-
-  const savingKeys = ['blue', 'red'];
-  const creditKeys = ['bofa', 'venmo'];
-
-  const savingsWithImages = savings.map((item, idx) => ({
-    ...item,
-    type: 'savings' as const,
-    imageKey: savingKeys[idx % savingKeys.length], // Cycles through keys
-  }));
-
-  const creditWithImages = credits.map((item, idx) => ({
-    ...item,
-    type: 'credit' as const,
-    imageKey: creditKeys[idx % creditKeys.length], // Cycles through keys
-  }));
-
-  function getReadableDate(date: Date){
+  function getReadableDate(date: Date) {
     const d = new Date(date);
     const mm = String(d.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
     const dd = String(d.getDate()).padStart(2, '0');
@@ -72,35 +40,22 @@ export default function HomeScreen() {
     return `${mm}/${dd}/${yyyy}`;
   }
 
+  // console.log("Credits: ", allReccuring)
+  // console.log("Expenses: ", allPLanned)
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1E1E1E' }} edges={['top']}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollableContainer}>
 
-        <View style={styles.islandBox}>
-          {savings.length === 0 ? (
-            <Text>No savings saved.</Text>
-          ) : (
-            <CardCarousel cardProp={savingsWithImages} />
-          )}
-        </View>
-
-        <View style={styles.islandBox}>
-          {credits.length === 0 ? (
-            <Text>No credit cards saved.</Text>
-          ) : (
-            <CardCarousel cardProp={creditWithImages} />
-          )}
-        </View>
-
         <View style={styles.islandTable}>
-          {recExpenses.length === 0 ? (
+          {allReccuring.length === 0 ? (
             <Text> No Expenses.</Text>
           ) : (
             <View>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>{month} Expenses</Text>
+                <Text style={styles.cardHeaderText}>Recurring Expenses</Text>
               </View>
 
               <ScrollView
@@ -108,7 +63,7 @@ export default function HomeScreen() {
                 contentContainerStyle={{ paddingBottom: 40 }}
                 style={{ flexGrow: 1 }}
               >
-                {recExpenses.map((expense) => (
+                {allReccuring.map((expense) => (
                   <View key={expense.id} style={styles.cardTableRow}>
                     <View style={{ flexDirection: 'column', width: '50%' }}>
                       <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
@@ -118,12 +73,19 @@ export default function HomeScreen() {
                       <Text style={styles.cardRowTextRight}>
                         Due {expense.reccurring_date}th
                       </Text>
-                      <TouchableOpacity
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>
-                          Pay
+                      {!expense.paid_for_month ? (
+                        <TouchableOpacity
+                          style={styles.tablePayButton}>
+                          <Text style={styles.tablePayButtonText}>
+                            Pay
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <Text style={styles.cardRowTextRight}>
+                          Paid
                         </Text>
-                      </TouchableOpacity>
+                      )
+                      }
                     </View>
                   </View>
                 ))}
@@ -134,7 +96,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.islandTable}>
-          {planExpenses.length === 0 ? (
+          {allPLanned.length === 0 ? (
             <Text> No Expenses.</Text>
           ) : (
             <View>
@@ -147,23 +109,43 @@ export default function HomeScreen() {
                 contentContainerStyle={{ paddingBottom: 40 }}
                 style={{ flexGrow: 1 }}
               >
-                {planExpenses.map((expense) => (
+                {allPLanned.map((expense) => (
                   <View key={expense.id} style={styles.cardTableRow}>
                     <View style={{ flexDirection: 'column', width: '50%' }}>
                       <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
                       <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
                     </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        {getReadableDate(expense.paid_date)}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>
-                          Pay
+
+                    {!expense.paid ? (
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        <Text style={styles.cardRowTextRight}>
+                          {getReadableDate(expense.paid_date)}
                         </Text>
-                      </TouchableOpacity>
-                    </View>
+                        <TouchableOpacity
+                          style={styles.tablePayButton}>
+                          <Text style={styles.tablePayButtonText}>
+                            Pay
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={{ flexDirection: 'column', width: '50%' }}>
+                        {expense.credited_to != null && (
+                        <Text style={styles.cardRowTextRight}>
+                          {credit[expense.credited_to].name} Paid
+                        </Text>
+                        )}
+                        {expense.withdrawn_from != null && (
+                        <Text style={styles.cardRowTextRight}>
+                          Paid from {saving[expense.withdrawn_from].name}
+                        </Text>
+                        )}
+                        <Text style={styles.cardRowTextRight}>
+                          {getReadableDate(expense.paid_date)}
+                        </Text>
+                      </View>
+                    )
+                    }
                   </View>
                 ))}
               </ScrollView>
@@ -291,15 +273,15 @@ const styles = StyleSheet.create({
     color: 'white',
     margin: 2,
   },
-  tablePayButton: { 
-    paddingVertical: 2, 
-    marginVertical: 2, 
-    width: '50%', 
-    height: '50%',                 
-    backgroundColor: 'rgba(74, 144, 226, 0.18)', 
-    borderRadius: 8, 
-    justifyContent: 'center', 
-    alignSelf: 'flex-end' 
+  tablePayButton: {
+    paddingVertical: 2,
+    marginVertical: 2,
+    width: '50%',
+    height: '50%',
+    backgroundColor: 'rgba(74, 144, 226, 0.18)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignSelf: 'flex-end'
   },
   tablePayButtonText: {
     color: 'white',

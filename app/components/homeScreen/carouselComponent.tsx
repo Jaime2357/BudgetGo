@@ -1,4 +1,4 @@
-import { CardComponentProps } from '@/app/types';
+import { CardComponentProps } from '@/types/typeDefs';
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import CardComponent from './cardComponent';
@@ -7,8 +7,8 @@ interface Props {
     cardProp: CardComponentProps[];
 }
 
-const CARD_WIDTH = 250;
-const CARD_SPACING = 16;
+const CARD_WIDTH = 275;
+const CARD_SPACING = 15;
 
 const CardCarousel: React.FC<Props> = ({ cardProp }) => (
     <View style={{ flex: 1, justifyContent: 'center' }}>

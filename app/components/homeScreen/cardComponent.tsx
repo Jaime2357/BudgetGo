@@ -1,15 +1,12 @@
-import { CardComponentProps } from '@/app/types';
+import { CardComponentProps } from '@/types/typeDefs';
 import { useFonts } from 'expo-font';
 import React from "react";
 import { ImageBackground, StyleSheet, Text, View } from 'react-native';
-import { imageMap } from './imageMap';
-
+import { imageMap } from '../../../assets/images/imageMap';
 
 interface CardProps {
   account: CardComponentProps;
 }
-
-
 
 const CardComponent: React.FC<CardProps> = ({ account }) => {
   const [loaded] = useFonts({
@@ -30,7 +27,7 @@ const CardComponent: React.FC<CardProps> = ({ account }) => {
           <ImageBackground
             source={imageMap[account.imageKey]}
             style={styles.cardBanner}>
-            <Text style={styles.bannerText}>{account.name}</Text>
+            <Text style={styles.bannerText}>{account.id}: {account.name}</Text>
           </ImageBackground>
           <View style={{ flex: 1, flexDirection: 'row', padding: 10 }}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -49,7 +46,7 @@ const CardComponent: React.FC<CardProps> = ({ account }) => {
           <ImageBackground
             source={imageMap[account.imageKey]}
             style={styles.cardBanner}>
-            <Text style={styles.bannerText}>{account.name}</Text>
+            <Text style={styles.bannerText}>{account.id}: {account.name}</Text>
           </ImageBackground>
           <View style={{ flex: 1, flexDirection: 'row', padding: 10 }}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -67,12 +64,12 @@ const CardComponent: React.FC<CardProps> = ({ account }) => {
   )
 };
 
-const CARD_WIDTH = 250;
+const CARD_WIDTH = 275;
 
 const styles = StyleSheet.create({
   cardContainer: {
     width: CARD_WIDTH,
-    height: 200,
+    height: 215,
     borderRadius: 12,
     backgroundColor: '#232323',
     borderColor: '#7a8899',
@@ -82,11 +79,11 @@ const styles = StyleSheet.create({
   },
   cardBanner: {
     width: '100%',
-    height: 100,
+    height: 120,
     justifyContent: 'center',
   },
   bannerText: {
-    fontSize: 27,
+    fontSize: 30,
     fontFamily: 'Tektur-Head',
     color: 'white',
     fontWeight: 'bold',
@@ -106,14 +103,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardBodyHeading: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: 'Tektur-Sub',
     color: 'white',
     textDecorationLine: 'underline',
     margin: 2
   },
   cardBodyText: {
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: 'Tektur',
     color: 'white',
     margin: 2,
