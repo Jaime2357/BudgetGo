@@ -1,12 +1,22 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import React, { useState } from 'react';
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { styles } from '@/styles/global';
+import { CreditAccount, PlanExpenses, RecExpenses, SavingAccount, Transaction } from '@/types/typeDefs';
 import initDB from '../database/dbInit';
-import accountRequest, { CreditAccount, PlanExpenses, RecExpenses, SavingAccount, Transaction } from '../database/dbReq';
+import accountRequest from '../database/dbReq';
 
 export default function SpendingScreen() {
-  useEffect(() => {
-    async function setupAndFetch() {
+  
+  useFocusEffect(
+      React.useCallback(() => {
+          setupAndFetch();
+      }, [])
+  );
+
+  async function setupAndFetch() {
       await initDB();
       const credits = await accountRequest.getCredit();
       const savings = await accountRequest.getSaving();
@@ -21,14 +31,14 @@ export default function SpendingScreen() {
       setAllPLanned(allPLanned);
       setTransactions(transactions);
     }
-    setupAndFetch();
-  }, []);
 
   const [credit, setCredit] = useState<Map<number, CreditAccount>>(new Map());
   const [saving, setSaving] = useState<Map<number, SavingAccount>>(new Map());
   const [allReccuring, setAllReccuring] = useState<RecExpenses[]>([]);
   const [allPLanned, setAllPLanned] = useState<PlanExpenses[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const [refreshing, setRefreshing] = useState(false);
 
   function getReadableDate(date: Date) {
     const d = new Date(date);
@@ -37,6 +47,12 @@ export default function SpendingScreen() {
     const yyyy = d.getFullYear();
     return `${mm}/${dd}/${yyyy}`;
   }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await setupAndFetch(); // Call your data reload logic here
+    setRefreshing(false);
+  };
 
   const getCreditName = (id: number | null | undefined): string => {
     if (!id) return '';
@@ -52,7 +68,12 @@ export default function SpendingScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollableContainer}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollableContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
+        }>
         <View style={styles.welcomeHeader}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.welcomeSubtext}>Let&apos;s look at your finances</Text>
@@ -211,118 +232,4 @@ export default function SpendingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  scrollableContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-  },
-  contentContainer: {
-    backgroundColor: 'black',
-    width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
-    borderTopStartRadius: 30,
-    borderTopEndRadius: 30,
-    paddingBottom: 20
-  },
-  welcomeHeader: {
-    marginBottom: 25,
-    paddingVertical: 13,
-    fontFamily: 'Tektur-Sub',
-    alignItems: 'center',
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    fontFamily: 'Tektur',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  welcomeSubtext: {
-    fontSize: 16,
-    color: '#ccc',
-  },
-  islandTable: {
-    backgroundColor: 'rgba(35, 35, 35, 0.9)',
-    borderColor: 'rgba(74, 144, 226, 0.18)',
-    borderWidth: 1,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 10,
-    marginVertical: 17,
-    width: '90%',
-    overflow: 'hidden'
-  },
-  extendedIslandTable: {
-    backgroundColor: 'rgba(35, 35, 35, 0.92)',
-    borderColor: 'rgba(74, 144, 226, 0.18)',
-    borderWidth: 1,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 10,
-    marginVertical: 17,
-    width: '90%',
-    aspectRatio: 0.5,
-    overflow: 'hidden'
-  },
-  cardHeader: {
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(74, 144, 226, 0.18)'
-  },
-  cardHeaderText: {
-    fontSize: 20,
-    fontFamily: 'Tektur-Head',
-    color: 'white'
-  },
-  cardTableRow: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 13,
-    borderBottomWidth: 1,
-    width: '95%',
-    borderBottomColor: 'white',
-    alignSelf: 'center',
-    flexDirection: 'row'
-  },
-  cardRowTextLeft: {
-    fontSize: 15,
-    fontFamily: 'Tektur-Sub',
-    color: 'white',
-    marginVertical: 2
-  },
-  cardRowTextRight: {
-    fontSize: 15,
-    fontFamily: 'Tektur-Sub',
-    marginVertical: 2,
-    color: 'white',
-    textAlign: 'right',
-  },
-  tablePayButton: {
-    paddingVertical: 2,
-    marginVertical: 2,
-    width: '50%',
-    height: '50%',
-    backgroundColor: 'rgba(74, 144, 226, 0.18)',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignSelf: 'flex-end'
-  },
-  tablePayButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontFamily: 'Tektur-Sub',
-    textAlign: 'center',
-    justifyContent: 'center'
-  }
-});
+
