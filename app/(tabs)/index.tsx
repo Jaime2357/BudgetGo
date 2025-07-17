@@ -1,12 +1,13 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import React, { useState } from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
 import { CreditAccount, PlanExpenses, RecExpenses, RecIncome, SavingAccount } from '@/types/typeDefs';
 import CardCarousel from '../components/homeScreen/carouselComponent';
 import initDB from '../database/dbInit';
+import dataPost from '../database/dbPost';
 import dataRequest from '../database/dbReq';
 
 export default function HomeScreen() {
@@ -67,6 +68,22 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  async function handleLogClick(amount: number, deposited_to: number, type: string, id: number) {
+    await dataPost.postDeposit(amount, deposited_to, type, id)
+
+    Alert.alert(
+      "Success",
+      "Income posted successfully!",
+      [
+        {
+          text: "OK",
+          onPress: () => router.replace('/'), // Navigate after OK
+        },
+      ],
+      { cancelable: false }
+    );
+
+  }
 
   function getReadableDate(date: Date) {
     const d = new Date(date);
@@ -100,7 +117,9 @@ export default function HomeScreen() {
           {/* 📦 Saving Accounts */}
           <View style={styles.islandBox}>
             {savings.length === 0 ? (
-              <Text>No savings saved.</Text>
+              <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>No Accounts Saved</Text>
+                </View>
             ) : (
               <CardCarousel cardProp={savingsWithImages} />
             )}
@@ -109,7 +128,9 @@ export default function HomeScreen() {
           {/* 💳 Credit Accounts */}
           <View style={styles.islandBox}>
             {credits.length === 0 ? (
-              <Text>No credit cards saved.</Text>
+              <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>No Credit Cards Saved</Text>
+                </View>
             ) : (
               <CardCarousel cardProp={creditWithImages} />
             )}
@@ -118,7 +139,9 @@ export default function HomeScreen() {
           {/* 🔁 Recurring Expenses */}
           <View style={styles.islandTable}>
             {recExpenses.length === 0 ? (
-              <Text>No Expenses.</Text>
+              <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>No Monthly Expenses</Text>
+                </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -147,7 +170,9 @@ export default function HomeScreen() {
           {/* 📅 Planned Expenses */}
           <View style={styles.islandTable}>
             {planExpenses.length === 0 ? (
-              <Text>No Expenses.</Text>
+              <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>No Planned Expenses </Text>
+                </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -176,7 +201,9 @@ export default function HomeScreen() {
           {/* 💸 Recurring Income */}
           <View style={styles.islandTable}>
             {recIncome.length === 0 ? (
-              <Text>No Income.</Text>
+              <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>No Reccurring Income</Text>
+                </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -193,7 +220,9 @@ export default function HomeScreen() {
                         {income.expected_date}th
                       </Text>
                       {!income.received ? (
-                        <TouchableOpacity style={styles.tablePayButton}>
+                        <TouchableOpacity
+                        style={styles.tablePayButton}
+                        onPress={() => handleLogClick(income.amount, income.deposited_to, 'reccurring_income', Number(income.id))}>
                           <Text style={styles.tablePayButtonText}>Log</Text>
                         </TouchableOpacity>
                       ) : (

@@ -8,7 +8,7 @@ import RadioGroup from 'react-native-radio-buttons-group';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
-import { styles } from '@/styles/global';
+import { pickerStyles, styles } from '@/styles/global';
 import dataPost from '../database/dbPost';
 import dataReq from '../database/dbReq';
 
@@ -35,11 +35,7 @@ type RadioButtonType = {
     label: string;
     value: string;
     selected?: boolean;
-    color?: string;
-    selectedColor?: string;
     labelStyle?: any;
-    containerStyle?: any;
-    // ...other possible customization fields
 };
 
 export default function NewTransaction() {
@@ -449,24 +445,3 @@ export default function NewTransaction() {
     );
 
 }
-
-const pickerStyles = {
-    inputIOS: {
-        color: 'white',
-        fontSize: 16,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        fontFamily: 'Tektur', // Your font here!
-    },
-    inputAndroid: {
-        color: 'white',
-        fontSize: 16,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        fontFamily: 'Tektur', // May NOT work due to native spinner on Android
-    },
-    placeholder: {
-        color: '#888',
-        fontFamily: 'Tektur', // Supported on iOS
-    },
-};

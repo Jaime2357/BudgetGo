@@ -1,9 +1,5 @@
 import db from "./dbOpen";
 
-type BalanceRow = {
-    balance: number;
-};
-
 export async function postSpend(
     name: string,
     type: string | null,
@@ -17,7 +13,7 @@ export async function postSpend(
 
     await db.withTransactionAsync(async () => {
 
-        if (!(amount > 0)) {
+        if (!(Number(amount) > 0)) {
             throw new Error('Transaction amount must be positive');
         }
         if (credited_to === null && withdrawn_from === null) {
@@ -29,11 +25,10 @@ export async function postSpend(
 
         await db.runAsync(
             `INSERT INTO transactions (name, type, amount, credited_to, withdrawn_from, transaction_date) VALUES (?, ?, ?, ?, ?, ?)`,
-            [name, type, amount, credited_to, withdrawn_from, transaction_date]);
+            [name, type, Number(amount), credited_to, withdrawn_from, transaction_date]);
 
-        if (credited_to === null) { // If credited_to is null, subtract from specified saving account
-
-            const initBal: { balance: number } | null = await db.getFirstAsync(
+        if (credited_to === null) { // Subtract from saving
+            const initBal: { balance: number | string } | null = await db.getFirstAsync(
                 'SELECT balance FROM saving_accounts WHERE id = ?', [withdrawn_from]
             );
 
@@ -41,15 +36,18 @@ export async function postSpend(
                 throw new Error('Could not retrieve payment account balance');
             }
 
-            let newBalance = initBal.balance - amount;
+            const currentBal = Number(initBal.balance);
+            const amt = Number(amount);
+
+            let newBalance = currentBal - amt;
 
             await db.runAsync(
-                'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newBalance, withdrawn_from])
+                'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newBalance, withdrawn_from]
+            );
         }
 
-        if (withdrawn_from === null) { // If withdrawn_from is null, add to specified credit balance
-
-            const initBal: { current_balance: number } | null = await db.getFirstAsync(
+        if (withdrawn_from === null) { // Add to credit
+            const initBal: { current_balance: number | string } | null = await db.getFirstAsync(
                 'SELECT current_balance FROM credit_accounts WHERE id = ?', [credited_to]
             );
 
@@ -57,10 +55,14 @@ export async function postSpend(
                 throw new Error('Could not retrieve payment credit balance');
             }
 
-            let newBalance = initBal.current_balance + amount;
+            const currentBal = Number(initBal.current_balance);
+            const amt = Number(amount);
+
+            let newBalance = currentBal + amt;
 
             await db.runAsync(
-                'UPDATE credit_accounts SET current_balance = ? WHERE id = ?', [newBalance, credited_to])
+                'UPDATE credit_accounts SET current_balance = ? WHERE id = ?', [newBalance, credited_to]
+            );
         }
 
     })
@@ -78,13 +80,13 @@ export async function postTransfer(
 
     await db.withTransactionAsync(async () => {
 
-        // Update Transaction Records
+        // Insert Transaction
         await db.runAsync(
             `INSERT INTO transactions (name, type, amount, deposited_to, withdrawn_from, transaction_date) VALUES (?, ?, ?, ?, ?, ?)`,
-            [name, type, amount, deposited_to, withdrawn_from, transaction_date]);
+            [name, type, Number(amount), deposited_to, withdrawn_from, transaction_date]);
 
-        // Update balance from sending account
-        const senderInitBal: { balance: number } | null = await db.getFirstAsync(
+        // Update sender account
+        const senderInitBal: { balance: number | string } | null = await db.getFirstAsync(
             'SELECT balance FROM saving_accounts WHERE id = ?', [withdrawn_from]
         );
 
@@ -92,14 +94,17 @@ export async function postTransfer(
             throw new Error('Could not retrieve sender account balance');
         }
 
-        let newSenderBalance = senderInitBal.balance - amount;
+        const senderBal = Number(senderInitBal.balance);
+        const amt = Number(amount);
+
+        let newSenderBalance = senderBal - amt;
 
         await db.runAsync(
             'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newSenderBalance, withdrawn_from]
-        )
+        );
 
-        // Update balance from receiving account
-        const receiverInitBal: { balance: number } | null = await db.getFirstAsync(
+        // Update receiver account
+        const receiverInitBal: { balance: number | string } | null = await db.getFirstAsync(
             'SELECT balance FROM saving_accounts WHERE id = ?', [deposited_to]
         );
 
@@ -107,12 +112,15 @@ export async function postTransfer(
             throw new Error('Could not retrieve receiver account balance');
         }
 
-        let newReceiverBalance = receiverInitBal.balance + amount;
+        const receiverBal = Number(receiverInitBal.balance);
+
+        let newReceiverBalance = receiverBal + amt;
 
         await db.runAsync(
             'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newReceiverBalance, deposited_to]
-        )
-    })
+        );
+
+    });
 
     console.log('Transfer Successfully Posted')
 }
@@ -126,9 +134,75 @@ export async function postIncome(
     paid_date: string
 ): Promise<void> {
 
+    console.log(paid_date)
+
     await db.runAsync(
         `INSERT INTO income (name, type, amount, deposited_to, received, paid_date) VALUES (?, ?, ?, ?, ?, ?)`,
-        [name, type, amount, deposited_to, received, paid_date]);
+        [name, type, Number(amount), deposited_to, received, paid_date]);
+
+    console.log('Deposit Successfully Posted')
+}
+
+export async function postRecIncome(
+    name: string,
+    type: string,
+    amount: number,
+    deposited_to: number,
+    received: boolean,
+    expected_date: number
+): Promise<void> {
+
+    await db.runAsync(
+        `INSERT INTO reccurring_income (name, type, amount, deposited_to, received, expected_date) VALUES (?, ?, ?, ?, ?, ?)`,
+        [name, type, Number(amount), deposited_to, received, expected_date]
+    );
+
+    console.log('Deposit Successfully Posted')
+}
+
+export async function postDeposit(
+    amount: number,
+    deposited_to: number,
+    type: string | null,
+    income_id: number | null
+) {
+
+    await db.withTransactionAsync(async () => {
+
+        const InitBal: { balance: number | string } | null = await db.getFirstAsync(
+            'SELECT balance FROM saving_accounts WHERE id = ?', [deposited_to]
+        );
+
+        if (InitBal === null) {
+            throw new Error('Could not retrieve account balance');
+        }
+
+        const startingBalance = Number(InitBal.balance);
+        const amt = Number(amount);
+
+        let newBalance = startingBalance + amt;
+        
+        await db.runAsync(
+            'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newBalance, deposited_to]
+        );
+        
+        if (income_id != null) {
+            if (type === 'income') {
+                await db.runAsync(
+                    'UPDATE income SET received = true WHERE id = ?', [income_id]
+                );
+            }
+            else if (type === 'reccurring_income') {
+                await db.runAsync(
+                    'UPDATE reccurring_income SET received = true WHERE id = ?', [income_id]
+                );
+            }
+            else {
+                throw new Error("Unknown Income Type");
+            }
+        }
+        
+    });
 
     console.log('Deposit Successfully Posted')
 }
@@ -136,5 +210,7 @@ export async function postIncome(
 export default {
     postSpend,
     postTransfer,
-    postIncome
+    postIncome,
+    postRecIncome,
+    postDeposit
 };

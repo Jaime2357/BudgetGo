@@ -9,28 +9,28 @@ import initDB from '../database/dbInit';
 import accountRequest from '../database/dbReq';
 
 export default function SpendingScreen() {
-  
+
   useFocusEffect(
-      React.useCallback(() => {
-          setupAndFetch();
-      }, [])
+    React.useCallback(() => {
+      setupAndFetch();
+    }, [])
   );
 
   async function setupAndFetch() {
-      await initDB();
-      const credits = await accountRequest.getCredit();
-      const savings = await accountRequest.getSaving();
-      const allReccuring = await accountRequest.getAllRecurring();
-      const allPLanned = await accountRequest.getAllPlanned();
-      const transactions = await accountRequest.getAllTransactions();
-      const creditMap = new Map(credits.map(credit => [credit.id, credit]));
-      const savingMap = new Map(savings.map(saving => [saving.id, saving]));
-      setCredit(creditMap);
-      setSaving(savingMap);
-      setAllReccuring(allReccuring);
-      setAllPLanned(allPLanned);
-      setTransactions(transactions);
-    }
+    await initDB();
+    const credits = await accountRequest.getCredit();
+    const savings = await accountRequest.getSaving();
+    const allReccuring = await accountRequest.getAllRecurring();
+    const allPLanned = await accountRequest.getAllPlanned();
+    const transactions = await accountRequest.getAllTransactions();
+    const creditMap = new Map(credits.map(credit => [credit.id, credit]));
+    const savingMap = new Map(savings.map(saving => [saving.id, saving]));
+    setCredit(creditMap);
+    setSaving(savingMap);
+    setAllReccuring(allReccuring);
+    setAllPLanned(allPLanned);
+    setTransactions(transactions);
+  }
 
   const [credit, setCredit] = useState<Map<number, CreditAccount>>(new Map());
   const [saving, setSaving] = useState<Map<number, SavingAccount>>(new Map());
@@ -81,7 +81,9 @@ export default function SpendingScreen() {
         <View style={styles.contentContainer}>
           <View style={styles.extendedIslandTable}>
             {transactions.length === 0 ? (
-              <Text>No Transactions.</Text>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>No Transactions Logged</Text>
+              </View>
             ) : (
               <View>
                 <View style={styles.cardHeader}>
@@ -139,7 +141,9 @@ export default function SpendingScreen() {
 
           <View style={styles.islandTable}>
             {allReccuring.length === 0 ? (
-              <Text>No Expenses.</Text>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>No Reccurring Expenses Logged</Text>
+              </View>
             ) : (
               <View>
                 <View style={styles.cardHeader}>
@@ -177,7 +181,9 @@ export default function SpendingScreen() {
 
           <View style={styles.islandTable}>
             {allPLanned.length === 0 ? (
-              <Text>No Expenses.</Text>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>No Planned Expenses Logged</Text>
+              </View>
             ) : (
               <View>
                 <View style={styles.cardHeader}>

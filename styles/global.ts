@@ -238,3 +238,24 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export const pickerStyles = {
+    inputIOS: {
+        color: 'white',
+        fontSize: 16,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        fontFamily: 'Tektur', // Your font here!
+    },
+    inputAndroid: {
+        color: 'white',
+        fontSize: 16,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        fontFamily: 'Tektur', // May NOT work due to native spinner on Android
+    },
+    placeholder: {
+        color: '#888',
+        fontFamily: 'Tektur', // Supported on iOS
+    },
+};
