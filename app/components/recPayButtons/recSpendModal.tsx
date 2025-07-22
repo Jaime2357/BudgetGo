@@ -4,7 +4,7 @@ import { Modal, ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, Vi
 
 import { modalStyles, styles } from "@/styles/global";
 import { CreditAccount, RecExpenses } from "@/types/typeDefs";
-import FormField from "../FormField";
+import FormField from "../forms/FormField";
 import DefaultRecModal from "./defaultRecModal";
 import ModRecModal from "./modRecModal";
 

@@ -30,6 +30,7 @@ const initDB = async (): Promise<void> => {
         type TEXT NOT NULL,
         amount NUMERIC NOT NULL DEFAULT 0,
         paid_for_month BOOLEAN DEFAULT 0,
+        monthly_reset BOOLEAN NOT NULL DEFAULT 0,
         credited_to INTEGER,
         reccurring_date INTEGER CHECK (reccurring_date > 0 AND reccurring_date < 32),
         FOREIGN KEY (credited_to) REFERENCES credit_accounts(id)
@@ -59,6 +60,7 @@ const initDB = async (): Promise<void> => {
         amount NUMERIC NOT NULL DEFAULT 0,
         deposited_to INTEGER NOT NULL,
         received BOOLEAN DEFAULT 0,
+        monthly_reset BOOLEAN NOT NULL DEFAULT 0,
         expected_date INTEGER NOT NULL,
         FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
       );`

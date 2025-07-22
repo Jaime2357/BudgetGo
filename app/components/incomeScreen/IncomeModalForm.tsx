@@ -9,7 +9,7 @@ import { modalStyles, pickerStyles, styles } from '@/styles/global';
 import { router } from 'expo-router';
 import dataPost from '../../database/dbPost';
 import actions from '../actions';
-import FormField from '../FormField';
+import FormField from '../forms/FormField';
 
 interface IncomeFormFields {
     name: string;

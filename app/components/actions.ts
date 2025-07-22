@@ -14,19 +14,25 @@ const getReadableDate = (date: string | Date) => {
     return `${mm}/${dd}/${yyyy}`;
 };
 
-function convertDate(date: Date) {
-    // Pad function for double digits
+export function convertDate(date: Date): string {
+    // Ensure it's a valid Date object
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        throw new Error('Invalid Date object passed to convertDateToSQLiteFormat');
+    }
+
     const pad = (d: number) => d.toString().padStart(2, '0');
 
     const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
+    const month = pad(date.getMonth() + 1); // Months are 0-indexed
     const day = pad(date.getDate());
     const hour = pad(date.getHours());
     const minute = pad(date.getMinutes());
     const second = pad(date.getSeconds());
 
+    // Final SQLite-compatible date string: 'YYYY-MM-DD HH:MM:SS'
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
+
 
 function getFullDate(day: number) {
     const now = new Date();

@@ -365,6 +365,27 @@ export async function postDeposit(
     console.log('Deposit Successfully Posted')
 }
 
+export async function monthlyPreset() {
+
+    await db.withTransactionAsync(async () => {
+        await db.runAsync(`UPDATE reccurring_income SET monthly_reset = false`)
+        await db.runAsync(`UPDATE reccurring_expenses SET monthly_reset = false`)
+    })
+
+    console.log( 'Monthly Preset Successful'  )
+}
+
+export async function monthlyReset() {
+
+    await db.withTransactionAsync(async () => {
+        await db.runAsync(`UPDATE reccurring_income SET received = false, monthly_reset = true WHERE monthly_reset = false`)
+        await db.runAsync(`UPDATE reccurring_expenses SET paid_for_month = false, monthly_reset = true WHERE monthly_reset = false`)
+    })
+
+    console.log( 'Monthly Reset Successful'  )
+
+}
+
 export default {
     postSpend,
     postRecSpend,
@@ -374,5 +395,7 @@ export default {
     postTransfer,
     postIncome,
     postRecIncome,
-    postDeposit
+    postDeposit,
+    monthlyPreset,
+    monthlyReset
 };

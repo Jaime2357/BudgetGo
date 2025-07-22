@@ -11,6 +11,7 @@ import dataRequest from '../database/dbReq';
 
 import IncomeModalForm from '../components/incomeScreen/IncomeModalForm';
 import IncomeSection from '../components/incomeScreen/IncomeSection';
+import RecurringIncomeTable from '../components/tables/RecurringIncomeTable';
 
 export default function IncomeScreen() {
 
@@ -60,7 +61,7 @@ export default function IncomeScreen() {
 
                 <View style={styles.contentContainer}>
                     <IncomeSection title="Income" data={allIncome} refData={saving} />
-                    <IncomeSection title="Recurring Income" data={recIncome} refData={saving} recurring />
+                    <RecurringIncomeTable data={recIncome} refData={saving} title="Recurring Income" />
                     <IncomeSection title="Pending Income" data={income} refData={saving} />
                 </View>
             </ScrollView>

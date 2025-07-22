@@ -9,7 +9,7 @@ import dataPost from "@/app/database/dbPost";
 import { pickerStyles, styles } from "@/styles/global";
 import { PlanExpenses } from "@/types/typeDefs";
 import actions from "../actions";
-import FormField from "../FormField";
+import FormField from "../forms/FormField";
 
 interface DefaultRecProps {
     record: PlanExpenses;

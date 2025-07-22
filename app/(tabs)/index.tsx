@@ -1,18 +1,49 @@
 import { useFocusEffect } from 'expo-router';
 import React, { useState } from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
-import { CreditAccount, PlanExpenses, RecExpenses, RecIncome, SavingAccount } from '@/types/typeDefs';
-import actions from '../components/actions';
-import CardCarousel from '../components/homeScreen/carouselComponent';
-import PaySingle from '../components/payButtons/spendModal';
-import PayRec from '../components/recPayButtons/recSpendModal';
 import initDB from '../database/dbInit';
+import dataPost from '../database/dbPost';
 import dataRequest from '../database/dbReq';
 
+import {
+  CreditAccount,
+  PlanExpenses,
+  RecExpenses,
+  RecIncome,
+  SavingAccount,
+} from '@/types/typeDefs';
+
+import EmptyListNotice from '../components/global/EmptyListNotice';
+import CardCarousel from '../components/homeScreen/carouselComponent';
+
+import PlannedExpensesList from '../components/tables/PlannedExpensesList';
+import RecurringExpensesList from '../components/tables/RecurringExpensesList';
+
+import PaySingle from '../components/payButtons/spendModal';
+import PayRec from '../components/recPayButtons/recSpendModal';
+import RecurringIncomeTable from '../components/tables/RecurringIncomeTable';
+
 export default function HomeScreen() {
+  const [savings, setSavings] = useState<SavingAccount[]>([]);
+  const [credits, setCredits] = useState<CreditAccount[]>([]);
+  const [recExpenses, setRecExpenses] = useState<RecExpenses[]>([]);
+  const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([]);
+  const [recIncome, setRecIncome] = useState<RecIncome[]>([]);
+  const [month, setMonth] = useState('January');
+
+  const [savingMap, setSavingMap] = useState<Map<number, SavingAccount>>(new Map());
+  const [creditMap, setCreditMap] = useState<Map<number, CreditAccount>>(new Map());
+  const [savingNames, setSavingNames] = useState<{ label: string; value: number }[]>([]);
+  const [creditNames, setCreditNames] = useState<{ label: string; value: number }[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [recModalOpen, setRecModalOpen] = useState(false);
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
+  const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -34,48 +65,33 @@ export default function HomeScreen() {
     setRecExpenses(recExpenses);
     setPlanExpenses(planExpenses);
     setRecIncome(recIncome);
-    setSavingNames(saving.map(acc => ({ label: acc.name, value: acc.id })));
-    setCreditNames(credits.map(acc => ({ label: acc.name, value: acc.id })));
-    setSavingMap(new Map(saving.map(s => [s.id, s])))
-    setCreditMap(new Map(credits.map(s => [s.id, s])))
 
-    const thisMonth = new Date();
-    const monthName = thisMonth.toLocaleString('default', { month: 'long' });
-    setMonth(monthName);
+    setSavingMap(new Map(saving.map((s) => [s.id, s])));
+    setCreditMap(new Map(credits.map((c) => [c.id, c])));
+    setSavingNames(saving.map((acc) => ({ label: acc.name, value: acc.id })));
+    setCreditNames(credits.map((acc) => ({ label: acc.name, value: acc.id })));
+
+    const today = new Date();
+    setMonth(today.toLocaleString('default', { month: 'long' }));
+
+    const currentDate = today.getDate();
+
+    if (currentDate === 30) await dataPost.monthlyPreset();
+    if (currentDate === 1) await dataPost.monthlyReset();
   }
-
-  const [savings, setSavings] = useState<SavingAccount[]>([]);
-  const [credits, setCredits] = useState<CreditAccount[]>([]);
-  const [recExpenses, setRecExpenses] = useState<RecExpenses[]>([]);
-  const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([]);
-  const [recIncome, setRecIncome] = useState<RecIncome[]>([]);
-  const [month, setMonth] = useState<string>('January');
-  const [savingNames, setSavingNames] = useState<{ label: string; value: number }[]>([])
-  const [creditNames, setCreditNames] = useState<{ label: string; value: number }[]>([])
-  const [savingMap, setSavingMap] = useState<Map<number, SavingAccount>>(new Map())
-  const [creditMap, setCreditMap] = useState<Map<number, CreditAccount>>(new Map())
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const savingKeys = ['blue', 'red'];
-  const creditKeys = ['bofa', 'venmo'];
 
   const savingsWithImages = savings.map((item, idx) => ({
     ...item,
     type: 'savings' as const,
-    imageKey: savingKeys[idx % savingKeys.length],
+    imageKey: ['blue', 'red'][idx % 2],
   }));
 
-  const creditWithImages = credits.map((item, idx) => ({
+  const creditsWithImages = credits.map((item, idx) => ({
     ...item,
     type: 'credit' as const,
-    imageKey: creditKeys[idx % creditKeys.length],
+    imageKey: ['bofa', 'venmo'][idx % 2],
   }));
 
-  const [recModalOpen, setRecModalOpen] = useState(false);
-  const [planModalOpen, setPlanModalOpen] = useState(false);
-  const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
-  const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
 
   const openRecModal = (record: RecExpenses) => {
     setActiveRecRecord(record);
@@ -89,155 +105,49 @@ export default function HomeScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await setupAndFetch(); // Call your data reload logic here
+    await setupAndFetch();
     setRefreshing(false);
   };
 
   return (
-    // <ImageBackground
-    //   source={imageMap['background']}
-    //   style={{ flex: 1 }}
-    //   resizeMode="cover"
-    // >
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollableContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
       >
-        {/* 👋 Welcome message */}
         <View style={styles.welcomeHeader}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.welcomeSubtext}>Let&apos;s look at your finances</Text>
+          <Text style={styles.welcomeSubtext}>Let's look at your finances</Text>
         </View>
 
         <View style={styles.contentContainer}>
-          {/* 📦 Saving Accounts */}
           <View style={styles.islandBox}>
-            {savings.length === 0 ? (
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>No Accounts Saved</Text>
-              </View>
+            {savingsWithImages.length === 0 ? (
+              <EmptyListNotice message="No Accounts Saved" />
             ) : (
               <CardCarousel cardProp={savingsWithImages} />
             )}
           </View>
-
-          {/* 💳 Credit Accounts */}
           <View style={styles.islandBox}>
-            {credits.length === 0 ? (
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>No Credit Cards Saved</Text>
-              </View>
+            {creditsWithImages.length === 0 ? (
+              <EmptyListNotice message="No Credit Cards Saved" />
             ) : (
-              <CardCarousel cardProp={creditWithImages} />
+              <CardCarousel cardProp={creditsWithImages} />
             )}
           </View>
-
-          {/* 🔁 Recurring Expenses */}
-          <View style={styles.islandTable}>
-            {recExpenses.length === 0 ? (
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>No Monthly Expenses</Text>
-              </View>
-            ) : (
-              <>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>{month} Expenses</Text>
-                </View>
-                {recExpenses.map((expense) => (
-                  <View key={expense.id} style={styles.cardTableRow}>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                      <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        Due {expense.reccurring_date}th
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => openRecModal(expense)}
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>Pay</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </>
-            )}
-          </View>
-
-          {/* 📅 Planned Expenses */}
-          <View style={styles.islandTable}>
-            {planExpenses.length === 0 ? (
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>No Planned Expenses </Text>
-              </View>
-            ) : (
-              <>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>Planned Expenses</Text>
-                </View>
-                {planExpenses.map((expense) => (
-                  <View key={expense.id} style={styles.cardTableRow}>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                      <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        {actions.getReadableDate(expense.paid_date)}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => openPlanModal(expense)}
-                        style={styles.tablePayButton}>
-                        <Text style={styles.tablePayButtonText}>Pay</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </>
-            )}
-          </View>
-
-          {/* 💸 Recurring Income */}
-          <View style={styles.islandTable}>
-            {recIncome.length === 0 ? (
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>No Reccurring Income</Text>
-              </View>
-            ) : (
-              <>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>Recurring Income</Text>
-                </View>
-                {recIncome.map((income) => (
-                  <View key={income.id} style={styles.cardTableRow}>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextLeft}>{income.name}:</Text>
-                      <Text style={styles.cardRowTextLeft}>${income.amount}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'column', width: '50%' }}>
-                      <Text style={styles.cardRowTextRight}>
-                        {income.expected_date}th
-                      </Text>
-                      {!income.received ? (
-                        <TouchableOpacity
-                          style={styles.tablePayButton}
-                          onPress={() => actions.handleLogClick(income.amount, income.deposited_to, 'reccurring_income', Number(income.id))}>
-                          <Text style={styles.tablePayButtonText}>Log</Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <Text style={styles.cardRowTextRight}>Received</Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </>
-            )}
-          </View>
+          <RecurringExpensesList
+            data={recExpenses}
+            month={month}
+            onPay={openRecModal}
+          />
+          <PlannedExpensesList
+            data={planExpenses}
+            onPay={openPlanModal}
+            creditMap={creditMap}
+            savingMap={savingMap}
+          />
+          <RecurringIncomeTable data={recIncome} refData={savingMap} />
         </View>
       </ScrollView>
       {activeRecRecord && (
@@ -247,13 +157,12 @@ export default function HomeScreen() {
           onClose={() => setRecModalOpen(false)}
           onSuccess={() => {
             setRecModalOpen(false);
-            onRefresh();  // refresh the recurring expenses list
+            onRefresh();
           }}
           creditOptions={creditNames}
           creditMap={creditMap}
         />
       )}
-
       {activePlanRecord && (
         <PaySingle
           record={activePlanRecord}
@@ -261,7 +170,7 @@ export default function HomeScreen() {
           onClose={() => setPlanModalOpen(false)}
           onSuccess={() => {
             setPlanModalOpen(false);
-            onRefresh();  // refresh the recurring expenses list
+            onRefresh();
           }}
           savingOptions={savingNames}
           creditOptions={creditNames}
@@ -270,6 +179,5 @@ export default function HomeScreen() {
         />
       )}
     </SafeAreaView>
-    // </ImageBackground>
   );
 }

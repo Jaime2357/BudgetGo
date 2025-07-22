@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 import dataPost from "@/app/database/dbPost";
@@ -17,16 +16,13 @@ const DefaultRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditM
 
     const [loading, setLoading] = useState(false);
 
-    const { control, handleSubmit } = useForm<{ credited_to: number }>();
+    async function onSimpleSubmit() {
 
-    async function onSimpleSubmit( data: { credited_to: number }) {
-
-        const { credited_to } = data
         try {
 
             await dataPost.postRecSpend(
                 record.id, record.name, record.type,
-                record.amount, credited_to, actions.getFullDate(record.reccurring_date))
+                record.amount, record.credited_to, actions.getFullDate(record.reccurring_date))
 
             Alert.alert(
                 "Success",
@@ -87,7 +83,7 @@ const DefaultRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditM
 
             <TouchableOpacity
                 style={styles.transSubmitButton}
-                onPress={handleSubmit(onSimpleSubmit)}
+                onPress={onSimpleSubmit}
                 disabled={loading}
             >
                 <Text style={styles.transSubmitButtonText}>
