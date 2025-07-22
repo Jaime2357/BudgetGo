@@ -94,6 +94,14 @@ const initDB = async (): Promise<void> => {
     );
   });
 
+  // await db.runAsync(
+  //   'UPDATE reccurring_expenses SET paid_for_month = false WHERE id = 4'
+  // );
+
+  // { "id": 4, "name": "Youtube Premium" },
+  // { "id": 5, "name": "Amazon Prime" },
+  // { "id": 6, "name": "Crunchyroll" }
+
 };
 
 export default initDB

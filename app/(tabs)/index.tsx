@@ -1,13 +1,15 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
 import { CreditAccount, PlanExpenses, RecExpenses, RecIncome, SavingAccount } from '@/types/typeDefs';
+import actions from '../components/actions';
 import CardCarousel from '../components/homeScreen/carouselComponent';
+import PaySingle from '../components/payButtons/spendModal';
+import PayRec from '../components/recPayButtons/recSpendModal';
 import initDB from '../database/dbInit';
-import dataPost from '../database/dbPost';
 import dataRequest from '../database/dbReq';
 
 export default function HomeScreen() {
@@ -32,6 +34,10 @@ export default function HomeScreen() {
     setRecExpenses(recExpenses);
     setPlanExpenses(planExpenses);
     setRecIncome(recIncome);
+    setSavingNames(saving.map(acc => ({ label: acc.name, value: acc.id })));
+    setCreditNames(credits.map(acc => ({ label: acc.name, value: acc.id })));
+    setSavingMap(new Map(saving.map(s => [s.id, s])))
+    setCreditMap(new Map(credits.map(s => [s.id, s])))
 
     const thisMonth = new Date();
     const monthName = thisMonth.toLocaleString('default', { month: 'long' });
@@ -44,6 +50,10 @@ export default function HomeScreen() {
   const [planExpenses, setPlanExpenses] = useState<PlanExpenses[]>([]);
   const [recIncome, setRecIncome] = useState<RecIncome[]>([]);
   const [month, setMonth] = useState<string>('January');
+  const [savingNames, setSavingNames] = useState<{ label: string; value: number }[]>([])
+  const [creditNames, setCreditNames] = useState<{ label: string; value: number }[]>([])
+  const [savingMap, setSavingMap] = useState<Map<number, SavingAccount>>(new Map())
+  const [creditMap, setCreditMap] = useState<Map<number, CreditAccount>>(new Map())
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -62,36 +72,26 @@ export default function HomeScreen() {
     imageKey: creditKeys[idx % creditKeys.length],
   }));
 
+  const [recModalOpen, setRecModalOpen] = useState(false);
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
+  const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
+
+  const openRecModal = (record: RecExpenses) => {
+    setActiveRecRecord(record);
+    setRecModalOpen(true);
+  };
+
+  const openPlanModal = (record: PlanExpenses) => {
+    setActivePlanRecord(record);
+    setPlanModalOpen(true);
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await setupAndFetch(); // Call your data reload logic here
     setRefreshing(false);
   };
-
-  async function handleLogClick(amount: number, deposited_to: number, type: string, id: number) {
-    await dataPost.postDeposit(amount, deposited_to, type, id)
-
-    Alert.alert(
-      "Success",
-      "Income posted successfully!",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace('/'), // Navigate after OK
-        },
-      ],
-      { cancelable: false }
-    );
-
-  }
-
-  function getReadableDate(date: Date) {
-    const d = new Date(date);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
-  }
 
   return (
     // <ImageBackground
@@ -118,8 +118,8 @@ export default function HomeScreen() {
           <View style={styles.islandBox}>
             {savings.length === 0 ? (
               <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>No Accounts Saved</Text>
-                </View>
+                <Text style={styles.cardHeaderText}>No Accounts Saved</Text>
+              </View>
             ) : (
               <CardCarousel cardProp={savingsWithImages} />
             )}
@@ -129,8 +129,8 @@ export default function HomeScreen() {
           <View style={styles.islandBox}>
             {credits.length === 0 ? (
               <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>No Credit Cards Saved</Text>
-                </View>
+                <Text style={styles.cardHeaderText}>No Credit Cards Saved</Text>
+              </View>
             ) : (
               <CardCarousel cardProp={creditWithImages} />
             )}
@@ -140,8 +140,8 @@ export default function HomeScreen() {
           <View style={styles.islandTable}>
             {recExpenses.length === 0 ? (
               <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>No Monthly Expenses</Text>
-                </View>
+                <Text style={styles.cardHeaderText}>No Monthly Expenses</Text>
+              </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -157,7 +157,9 @@ export default function HomeScreen() {
                       <Text style={styles.cardRowTextRight}>
                         Due {expense.reccurring_date}th
                       </Text>
-                      <TouchableOpacity style={styles.tablePayButton}>
+                      <TouchableOpacity
+                        onPress={() => openRecModal(expense)}
+                        style={styles.tablePayButton}>
                         <Text style={styles.tablePayButtonText}>Pay</Text>
                       </TouchableOpacity>
                     </View>
@@ -171,8 +173,8 @@ export default function HomeScreen() {
           <View style={styles.islandTable}>
             {planExpenses.length === 0 ? (
               <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>No Planned Expenses </Text>
-                </View>
+                <Text style={styles.cardHeaderText}>No Planned Expenses </Text>
+              </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -186,9 +188,11 @@ export default function HomeScreen() {
                     </View>
                     <View style={{ flexDirection: 'column', width: '50%' }}>
                       <Text style={styles.cardRowTextRight}>
-                        {getReadableDate(expense.paid_date)}
+                        {actions.getReadableDate(expense.paid_date)}
                       </Text>
-                      <TouchableOpacity style={styles.tablePayButton}>
+                      <TouchableOpacity
+                        onPress={() => openPlanModal(expense)}
+                        style={styles.tablePayButton}>
                         <Text style={styles.tablePayButtonText}>Pay</Text>
                       </TouchableOpacity>
                     </View>
@@ -202,8 +206,8 @@ export default function HomeScreen() {
           <View style={styles.islandTable}>
             {recIncome.length === 0 ? (
               <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>No Reccurring Income</Text>
-                </View>
+                <Text style={styles.cardHeaderText}>No Reccurring Income</Text>
+              </View>
             ) : (
               <>
                 <View style={styles.cardHeader}>
@@ -221,8 +225,8 @@ export default function HomeScreen() {
                       </Text>
                       {!income.received ? (
                         <TouchableOpacity
-                        style={styles.tablePayButton}
-                        onPress={() => handleLogClick(income.amount, income.deposited_to, 'reccurring_income', Number(income.id))}>
+                          style={styles.tablePayButton}
+                          onPress={() => actions.handleLogClick(income.amount, income.deposited_to, 'reccurring_income', Number(income.id))}>
                           <Text style={styles.tablePayButtonText}>Log</Text>
                         </TouchableOpacity>
                       ) : (
@@ -236,6 +240,35 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+      {activeRecRecord && (
+        <PayRec
+          record={activeRecRecord}
+          visible={recModalOpen}
+          onClose={() => setRecModalOpen(false)}
+          onSuccess={() => {
+            setRecModalOpen(false);
+            onRefresh();  // refresh the recurring expenses list
+          }}
+          creditOptions={creditNames}
+          creditMap={creditMap}
+        />
+      )}
+
+      {activePlanRecord && (
+        <PaySingle
+          record={activePlanRecord}
+          visible={planModalOpen}
+          onClose={() => setPlanModalOpen(false)}
+          onSuccess={() => {
+            setPlanModalOpen(false);
+            onRefresh();  // refresh the recurring expenses list
+          }}
+          savingOptions={savingNames}
+          creditOptions={creditNames}
+          savingMap={savingMap}
+          creditMap={creditMap}
+        />
+      )}
     </SafeAreaView>
     // </ImageBackground>
   );

@@ -69,6 +69,164 @@ export async function postSpend(
     console.log('Spend Successfully Posted')
 }
 
+export async function postRecSpend(
+    id: number,
+    name: string,
+    type: string | null,
+    amount: number,
+    credited_to: number | null,
+    reccurring_date: string
+): Promise<void> {
+
+    console.log(name, type, amount, credited_to, reccurring_date)
+
+    await db.withTransactionAsync(async () => {
+
+        if (!(Number(amount) > 0)) {
+            throw new Error('Transaction amount must be positive');
+        }
+        if (credited_to === null) {
+            throw new Error('No payment account ID specified')
+        }
+
+        await db.runAsync(
+            `INSERT INTO transactions (name, type, amount, credited_to, transaction_date) VALUES (?, ?, ?, ?, ?)`,
+            [name, type, Number(amount), credited_to, reccurring_date]);
+
+
+        const initBal: { current_balance: number | string } | null = await db.getFirstAsync(
+            'SELECT current_balance FROM credit_accounts WHERE id = ?', [credited_to]
+        );
+
+        if (initBal === null) {
+            throw new Error('Could not retrieve payment credit balance');
+        }
+
+        const currentBal = Number(initBal.current_balance);
+        const amt = Number(amount);
+
+        let newBalance = currentBal + amt;
+
+        await db.runAsync(
+            'UPDATE credit_accounts SET current_balance = ? WHERE id = ?', [newBalance, credited_to]
+        );
+
+        await db.runAsync(
+            'UPDATE reccurring_expenses SET paid_for_month = true WHERE id = ?', [id]
+        );
+
+    })
+    console.log('Monthly Spend Successfully Posted')
+}
+
+export async function postPlanSpend(
+    id: number,
+    name: string,
+    type: string | null,
+    amount: number,
+    credited_to: number | null,
+    withdrawn_from: number | null,
+    paid_date: string
+): Promise<void> {
+
+    console.log('Reached: ', id, name, type, amount, credited_to, withdrawn_from, paid_date)
+    await db.withTransactionAsync(async () => {
+
+        if (!(Number(amount) > 0)) {
+            throw new Error('Transaction amount must be positive');
+        }
+        if (credited_to === null && withdrawn_from === null) {
+            throw new Error('No payment account ID specified')
+        }
+        else if (credited_to !== null && withdrawn_from !== null) {
+            throw new Error('Ambiguous: cannot credit and withdraw in the same spend');
+        }
+
+        await db.runAsync(
+            `INSERT INTO transactions (name, type, amount, credited_to, withdrawn_from, transaction_date) VALUES (?, ?, ?, ?, ?, ?)`,
+            [name, type, Number(amount), credited_to, withdrawn_from, paid_date]);
+
+        if (credited_to === null) { // Subtract from saving
+            const initBal: { balance: number | string } | null = await db.getFirstAsync(
+                'SELECT balance FROM saving_accounts WHERE id = ?', [withdrawn_from]
+            );
+
+            if (initBal === null) {
+                throw new Error('Could not retrieve payment account balance');
+            }
+
+            const currentBal = Number(initBal.balance);
+            const amt = Number(amount);
+
+            let newBalance = currentBal - amt;
+
+            await db.runAsync(
+                'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newBalance, withdrawn_from]
+            );
+        }
+
+        if (withdrawn_from === null) { // Add to credit
+            const initBal: { current_balance: number | string } | null = await db.getFirstAsync(
+                'SELECT current_balance FROM credit_accounts WHERE id = ?', [credited_to]
+            );
+
+            if (initBal === null) {
+                throw new Error('Could not retrieve payment credit balance');
+            }
+
+            const currentBal = Number(initBal.current_balance);
+            const amt = Number(amount);
+
+            let newBalance = currentBal + amt;
+
+            await db.runAsync(
+                'UPDATE credit_accounts SET current_balance = ? WHERE id = ?', [newBalance, credited_to]
+            );
+        }
+
+        await db.runAsync(
+            'UPDATE planned_expenses SET paid = true WHERE id = ?', [id]
+        );
+
+    })
+    console.log('Planned Spend Successfully Posted')
+}
+
+export async function updateRecSpend(
+    id: number,
+    name: string,
+    type: string | null,
+    amount: number,
+    credited_to: number | null,
+    reccurring_date: number
+): Promise<void> {
+
+    await db.runAsync(
+        'UPDATE reccurring_expenses SET name = ?, type = ?, amount = ?, credited_to = ?, reccurring_date = ?, paid_for_month = true WHERE id = ?',
+        [name, type, amount, credited_to, reccurring_date, id]
+    );
+
+    console.log('Monthly Spend Successfully Updated')
+}
+
+export async function updatePlanSpend(
+    id: number,
+    name: string,
+    type: string | null,
+    amount: number,
+    credited_to: number | null,
+    withdrawn_from: number | null,
+    paid_date: string
+): Promise<void> {
+
+    await db.runAsync(
+        'UPDATE planned_expenses SET name = ?, type = ?, amount = ?, credited_to = ?, withdrawn_from = ?, paid_date = ?, paid = true WHERE id = ?',
+        [name, type, amount, credited_to, withdrawn_from, paid_date, id]
+    );
+
+    console.log('Monthly Spend Successfully Updated')
+}
+
 export async function postTransfer(
     name: string,
     type: string | null,
@@ -181,11 +339,11 @@ export async function postDeposit(
         const amt = Number(amount);
 
         let newBalance = startingBalance + amt;
-        
+
         await db.runAsync(
             'UPDATE saving_accounts SET balance = ? WHERE id = ?', [newBalance, deposited_to]
         );
-        
+
         if (income_id != null) {
             if (type === 'income') {
                 await db.runAsync(
@@ -201,7 +359,7 @@ export async function postDeposit(
                 throw new Error("Unknown Income Type");
             }
         }
-        
+
     });
 
     console.log('Deposit Successfully Posted')
@@ -209,6 +367,10 @@ export async function postDeposit(
 
 export default {
     postSpend,
+    postRecSpend,
+    postPlanSpend,
+    updateRecSpend,
+    updatePlanSpend,
     postTransfer,
     postIncome,
     postRecIncome,

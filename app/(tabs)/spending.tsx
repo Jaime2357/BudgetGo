@@ -5,6 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
 import { CreditAccount, PlanExpenses, RecExpenses, SavingAccount, Transaction } from '@/types/typeDefs';
+import actions, { getCreditName, getSavingName } from '../components/actions';
+import PaySingle from '../components/payButtons/spendModal';
+import PayRec from '../components/recPayButtons/recSpendModal';
 import initDB from '../database/dbInit';
 import accountRequest from '../database/dbReq';
 
@@ -30,6 +33,8 @@ export default function SpendingScreen() {
     setAllReccuring(allReccuring);
     setAllPLanned(allPLanned);
     setTransactions(transactions);
+    setSavingNames(savings.map(acc => ({ label: acc.name, value: acc.id })));
+    setCreditNames(credits.map(acc => ({ label: acc.name, value: acc.id })));
   }
 
   const [credit, setCredit] = useState<Map<number, CreditAccount>>(new Map());
@@ -37,33 +42,29 @@ export default function SpendingScreen() {
   const [allReccuring, setAllReccuring] = useState<RecExpenses[]>([]);
   const [allPLanned, setAllPLanned] = useState<PlanExpenses[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [savingNames, setSavingNames] = useState<{ label: string; value: number }[]>([]);
+  const [creditNames, setCreditNames] = useState<{ label: string; value: number }[]>([]);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [recModalOpen, setRecModalOpen] = useState(false);
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
+  const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
 
-  function getReadableDate(date: Date) {
-    const d = new Date(date);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
-  }
+  const openRecModal = (record: RecExpenses) => {
+    setActiveRecRecord(record);
+    setRecModalOpen(true);
+  };
+
+  const openPlanModal = (record: PlanExpenses) => {
+    setActivePlanRecord(record);
+    setPlanModalOpen(true);
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
     await setupAndFetch(); // Call your data reload logic here
     setRefreshing(false);
-  };
-
-  const getCreditName = (id: number | null | undefined): string => {
-    if (!id) return '';
-    const creditAccount = credit.get(id);
-    return creditAccount?.name ?? '';
-  };
-
-  const getsSavingName = (id: number | null | undefined): string => {
-    if (!id) return '';
-    const savingAccount = saving.get(id);
-    return savingAccount?.name ?? '';
   };
 
   return (
@@ -105,30 +106,30 @@ export default function SpendingScreen() {
                       {transaction.credited_to != null && (
                         <View style={{ flexDirection: 'column', width: '50%' }}>
                           <Text style={styles.cardRowTextRight}>
-                            {getCreditName(transaction.credited_to)} Paid
+                            {getCreditName(credit, transaction.credited_to)} Paid
                           </Text>
                           <Text style={styles.cardRowTextRight}>
-                            {getReadableDate(transaction.transaction_date)}
+                            {actions.getReadableDate(transaction.transaction_date)}
                           </Text>
                         </View>
                       )}
                       {(transaction.withdrawn_from != null && transaction.deposited_to === null) && (
                         <View style={{ flexDirection: 'column', width: '50%' }}>
                           <Text style={styles.cardRowTextRight}>
-                            Paid From {getsSavingName(transaction.withdrawn_from)}
+                            Paid From {getSavingName(saving, transaction.withdrawn_from)}
                           </Text>
                           <Text style={styles.cardRowTextRight}>
-                            {getReadableDate(transaction.transaction_date)}
+                            {actions.getReadableDate(transaction.transaction_date)}
                           </Text>
                         </View>
                       )}
                       {(transaction.withdrawn_from != null && transaction.deposited_to != null) && (
                         <View style={{ flexDirection: 'column', width: '50%' }}>
                           <Text style={styles.cardRowTextRight}>
-                            {getsSavingName(transaction.withdrawn_from)} {'>'} {getsSavingName(transaction.deposited_to)}
+                            {getSavingName(saving, transaction.withdrawn_from)} {'>'} {getSavingName(saving, transaction.deposited_to)}
                           </Text>
                           <Text style={styles.cardRowTextRight}>
-                            {getReadableDate(transaction.transaction_date)}
+                            {actions.getReadableDate(transaction.transaction_date)}
                           </Text>
                         </View>
                       )}
@@ -165,7 +166,9 @@ export default function SpendingScreen() {
                           Due {expense.reccurring_date}th
                         </Text>
                         {!expense.paid_for_month ? (
-                          <TouchableOpacity style={styles.tablePayButton}>
+                          <TouchableOpacity
+                            onPress={() => openRecModal(expense)}
+                            style={styles.tablePayButton}>
                             <Text style={styles.tablePayButtonText}>Pay</Text>
                           </TouchableOpacity>
                         ) : (
@@ -203,9 +206,11 @@ export default function SpendingScreen() {
                       {!expense.paid ? (
                         <View style={{ flexDirection: 'column', width: '50%' }}>
                           <Text style={styles.cardRowTextRight}>
-                            {getReadableDate(expense.paid_date)}
+                            {actions.getReadableDate(expense.paid_date)}
                           </Text>
-                          <TouchableOpacity style={styles.tablePayButton}>
+                          <TouchableOpacity
+                            onPress={() => openPlanModal(expense)}
+                            style={styles.tablePayButton}>
                             <Text style={styles.tablePayButtonText}>Pay</Text>
                           </TouchableOpacity>
                         </View>
@@ -213,16 +218,16 @@ export default function SpendingScreen() {
                         <View style={{ flexDirection: 'column', width: '50%' }}>
                           {expense.credited_to != null && (
                             <Text style={styles.cardRowTextRight}>
-                              {getCreditName(expense.credited_to)} Paid
+                              {getCreditName(credit, expense.credited_to)} Paid
                             </Text>
                           )}
                           {expense.withdrawn_from != null && (
                             <Text style={styles.cardRowTextRight}>
-                              Paid from {getsSavingName(expense.withdrawn_from)}
+                              Paid from {getSavingName(saving, expense.withdrawn_from)}
                             </Text>
                           )}
                           <Text style={styles.cardRowTextRight}>
-                            {getReadableDate(expense.paid_date)}
+                            {actions.getReadableDate(expense.paid_date)}
                           </Text>
                         </View>
                       )}
@@ -234,7 +239,38 @@ export default function SpendingScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {activeRecRecord && (
+        <PayRec
+          record={activeRecRecord}
+          visible={recModalOpen}
+          onClose={() => setRecModalOpen(false)}
+          onSuccess={() => {
+            setRecModalOpen(false);
+            onRefresh();  // refresh the recurring expenses list
+          }}
+          creditOptions={creditNames}
+          creditMap={credit}
+        />
+      )}
+
+      {activePlanRecord && (
+        <PaySingle
+          record={activePlanRecord}
+          visible={planModalOpen}
+          onClose={() => setPlanModalOpen(false)}
+          onSuccess={() => {
+            setPlanModalOpen(false);
+            onRefresh();  // refresh the recurring expenses list
+          }}
+          savingOptions={savingNames}
+          creditOptions={creditNames}
+          savingMap={saving}
+          creditMap={credit}
+        />
+      )}
+
+    </SafeAreaView >
   );
 }
 

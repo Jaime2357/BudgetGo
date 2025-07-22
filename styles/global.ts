@@ -59,20 +59,20 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   extendedIslandTable: {
-        backgroundColor: 'rgba(35, 35, 35, 0.92)',
-        borderColor: 'rgba(74, 144, 226, 0.18)',
-        borderWidth: 1,
-        borderRadius: 30,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.12,
-        shadowRadius: 24,
-        elevation: 10,
-        marginVertical: 17,
-        width: '90%',
-        aspectRatio: 0.5,
-        overflow: 'hidden'
-    },
+    backgroundColor: 'rgba(35, 35, 35, 0.92)',
+    borderColor: 'rgba(74, 144, 226, 0.18)',
+    borderWidth: 1,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 10,
+    marginVertical: 17,
+    width: '90%',
+    aspectRatio: 0.5,
+    overflow: 'hidden'
+  },
   cardHeader: {
     paddingHorizontal: 25,
     paddingVertical: 10,
@@ -160,6 +160,22 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  transTitle: {
+    fontSize: 20,
+    color: '#aad1fa',
+    fontFamily: 'Tektur-Sub',
+    margin: 10,
+    paddingLeft: 8,
+    textAlign: 'center',
+  },
+  transSubtitle: {
+    fontSize: 14,
+    color: 'white',
+    fontFamily: 'Tektur-Sub',
+    margin: 10,
+    paddingHorizontal: 10,
+    textAlign: 'center',
+  },
   transLabel: {
     fontSize: 16,
     color: '#aad1fa',
@@ -177,6 +193,15 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     margin: 12,
+    fontFamily: 'Tektur-Sub',
+    fontSize: 16,
+    width: 260,
+  },
+  transValue: {
+    backgroundColor: '#232323',
+    color: 'white',
+    paddingHorizontal: 14,
+    marginHorizontal: 12,
     fontFamily: 'Tektur-Sub',
     fontSize: 16,
     width: 260,
@@ -202,6 +227,17 @@ export const styles = StyleSheet.create({
     color: '#fa6d6d',
     fontSize: 13,
     marginBottom: 6,
+  },
+  checkbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#232323',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(74, 144, 226, 0.18)',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    width: 260,
   },
   transDateButton: {
     backgroundColor: '#222',
@@ -240,22 +276,62 @@ export const styles = StyleSheet.create({
 });
 
 export const pickerStyles = {
-    inputIOS: {
-        color: 'white',
-        fontSize: 16,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        fontFamily: 'Tektur', // Your font here!
-    },
-    inputAndroid: {
-        color: 'white',
-        fontSize: 16,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        fontFamily: 'Tektur', // May NOT work due to native spinner on Android
-    },
-    placeholder: {
-        color: '#888',
-        fontFamily: 'Tektur', // Supported on iOS
-    },
+  inputIOS: {
+    color: 'white',
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    fontFamily: 'Tektur', // Your font here!
+  },
+  inputAndroid: {
+    color: 'white',
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    fontFamily: 'Tektur', // May NOT work due to native spinner on Android
+  },
+  placeholder: {
+    color: '#888',
+    fontFamily: 'Tektur', // Supported on iOS
+  },
 };
+
+export const modalStyles = StyleSheet.create({
+  fabStyle: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    backgroundColor: '#5294ec',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    zIndex: 99,
+  },
+  menuBox: {
+    backgroundColor: '#232323',
+    borderRadius: 18,
+    padding: 28,
+    width: 340,
+    maxWidth: '94%',
+    maxHeight: 500,        // or tweak as desired
+    shadowColor: '#222',
+    shadowOffset: { width: 0, height: 7 },
+    shadowOpacity: 0.15,
+    shadowRadius: 14,
+    elevation: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',  // Dims the background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+});

@@ -7,8 +7,8 @@ import RNPickerSelect from 'react-native-picker-select';
 import RadioGroup from 'react-native-radio-buttons-group';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 import { pickerStyles, styles } from '@/styles/global';
+import actions from '../components/actions';
 import dataPost from '../database/dbPost';
 import dataReq from '../database/dbReq';
 
@@ -108,20 +108,6 @@ export default function NewTransaction() {
         setRefreshing(false);
     };
 
-    function convertDate(date: Date) {
-        // Pad function for double digits
-        const pad = (d: number) => d.toString().padStart(2, '0');
-
-        const year = date.getFullYear();
-        const month = pad(date.getMonth() + 1);
-        const day = pad(date.getDate());
-        const hour = pad(date.getHours());
-        const minute = pad(date.getMinutes());
-        const second = pad(date.getSeconds());
-
-        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-    }
-
     async function onSubmit(data: Transaction) {
         setLoading(true);
         try {
@@ -146,9 +132,9 @@ export default function NewTransaction() {
             }
 
             if (type === 'transfer' && deposited_to != null && withdrawn_from != null) {
-                await dataPost.postTransfer(name, type, Number(amount), deposited_to, withdrawn_from, convertDate(transaction_date));
+                await dataPost.postTransfer(name, type, Number(amount), deposited_to, withdrawn_from, actions.convertDate(transaction_date));
             } else {
-                await dataPost.postSpend(name, type, Number(amount), credited_to, withdrawn_from, convertDate(transaction_date));
+                await dataPost.postSpend(name, type, Number(amount), credited_to, withdrawn_from, actions.convertDate(transaction_date));
             }
 
             // Show success alert
@@ -437,7 +423,9 @@ export default function NewTransaction() {
                         style={styles.transSubmitButton}
                         onPress={handleSubmit(onSubmit)}
                     >
-                        <Text style={styles.transSubmitButtonText}>Submit</Text>
+                        <Text style={styles.transSubmitButtonText}>
+                            {loading ? 'Submitting...' : 'Submit'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
