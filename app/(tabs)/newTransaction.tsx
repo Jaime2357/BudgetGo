@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
+import { PickerItem } from '@/types/typeDefs';
 import actions from '../components/actions';
 import dataPost from '../database/dbPost';
 import dataReq from '../database/dbReq';
@@ -22,12 +23,6 @@ import FormDateField from '../components/forms/FormDateField';
 import FormInputField from '../components/forms/FormInputField';
 import FormPickerField from '../components/forms/FormPickerField';
 import FormRadioGroup from '../components/forms/FormRadioGroup';
-
-type PickerItem = {
-    label: string;
-    value: number;
-};
-
 
 interface Transaction {
     name: string;
@@ -122,7 +117,7 @@ export default function NewTransaction() {
             if (type === 'transfer' && deposited_to != null && withdrawn_from != null) {
                 await dataPost.postTransfer(name, type, Number(amount), deposited_to, withdrawn_from, actions.convertDate(transaction_date));
             } else {
-                await dataPost.postSpend(name, type, Number(amount), credited_to, withdrawn_from, actions.convertDate(transaction_date));
+                await dataPost.newSpend(name, type, Number(amount), credited_to, withdrawn_from, actions.convertDate(transaction_date));
             }
 
             Alert.alert('Success', 'Transaction posted successfully!', [
@@ -139,15 +134,15 @@ export default function NewTransaction() {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
             <ScrollView
                 style={styles.container}
-                contentContainerStyle={styles.scrollableContainer}
+                contentContainerStyle={styles.scrollViewContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
             >
-                <View style={styles.transWelcomeHeader}>
-                    <Text style={styles.transWelcomeText}>Welcome Back</Text>
-                    <Text style={styles.transWelcomeSubtext}>Let's look at your finances</Text>
+                <View style={styles.headerContainer}>
+                    <Text style={styles.headerTitle}>Welcome Back</Text>
+                    <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
                 </View>
 
-                <View style={styles.transactionCardForm}>
+                <View style={styles.formCard}>
                     <FormInputField control={control} name="name" label="Transaction Name" placeholder="Enter Transaction Name" />
 
                     <FormRadioGroup
@@ -198,8 +193,8 @@ export default function NewTransaction() {
                         setShowPicker={setShowPicker}
                     />
 
-                    <TouchableOpacity style={styles.transSubmitButton} onPress={handleSubmit(onSubmit)}>
-                        <Text style={styles.transSubmitButtonText}>
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
+                        <Text style={styles.submitButtonText}>
                             {loading ? 'Submitting...' : 'Submit'}
                         </Text>
                     </TouchableOpacity>

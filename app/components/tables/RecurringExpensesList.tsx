@@ -12,31 +12,31 @@ interface Props {
 
 export default function RecurringExpensesList({ data, month, onPay }: Props) {
   return (
-    <View style={styles.islandTable}>
+    <View style={styles.tableContainer}>
       {data.length === 0 ? (
         <EmptyListNotice message="No Monthly Expenses" />
       ) : (
         <>
           {month && (
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardHeaderText}>{month} Expenses</Text>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderText}>{month} Expenses</Text>
             </View>
           )}
           {!month && (
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardHeaderText}>Recurring Expenses</Text>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderText}>Recurring Expenses</Text>
             </View>
           )}
           {data.map((expense) => (
-            <View key={expense.id} style={styles.cardTableRow}>
+            <View key={expense.id} style={styles.tableRow}>
               <View style={{ flexDirection: 'column', width: '50%' }}>
-                <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
+                <Text style={styles.rowTextLeft}>{expense.name}:</Text>
+                <Text style={styles.rowTextLeft}>${expense.amount}</Text>
               </View>
               <View style={{ flexDirection: 'column', width: '50%' }}>
-                <Text style={styles.cardRowTextRight}>Due {expense.reccurring_date}th</Text>
-                <TouchableOpacity onPress={() => onPay(expense)} style={styles.tablePayButton}>
-                  <Text style={styles.tablePayButtonText}>Pay</Text>
+                <Text style={styles.rowTextRight}>Due {expense.reccurring_date}th</Text>
+                <TouchableOpacity onPress={() => onPay(expense)} style={styles.payButton}>
+                  <Text style={styles.payButtonText}>Pay</Text>
                 </TouchableOpacity>
               </View>
             </View>

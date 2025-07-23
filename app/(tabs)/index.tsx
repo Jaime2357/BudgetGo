@@ -113,23 +113,23 @@ export default function HomeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.scrollableContainer}
+        contentContainerStyle={styles.scrollViewContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
       >
-        <View style={styles.welcomeHeader}>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.welcomeSubtext}>Let's look at your finances</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Welcome Back</Text>
+          <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
         </View>
 
-        <View style={styles.contentContainer}>
-          <View style={styles.islandBox}>
+        <View style={styles.innerContent}>
+          <View style={styles.contentBox}>
             {savingsWithImages.length === 0 ? (
               <EmptyListNotice message="No Accounts Saved" />
             ) : (
               <CardCarousel cardProp={savingsWithImages} />
             )}
           </View>
-          <View style={styles.islandBox}>
+          <View style={styles.contentBox}>
             {creditsWithImages.length === 0 ? (
               <EmptyListNotice message="No Credit Cards Saved" />
             ) : (

@@ -16,32 +16,32 @@ export default function RecurringIncomeTable({
   title = 'Recurring Income',
 }: RecurringIncomeTableProps) {
   return (
-    <View style={styles.islandTable}>
+    <View style={styles.tableContainer}>
       {data.length === 0 ? (
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardHeaderText}>No {title}</Text>
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>No {title}</Text>
         </View>
       ) : (
         <>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardHeaderText}>{title}</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText}>{title}</Text>
           </View>
           <ScrollView nestedScrollEnabled contentContainerStyle={{ paddingBottom: 40 }} style={{ flexGrow: 1 }}>
             {data.map((income) => (
-              <View key={income.id} style={styles.cardTableRow}>
+              <View key={income.id} style={styles.tableRow}>
                 <View style={{ flexDirection: 'column', width: '50%' }}>
-                  <Text style={styles.cardRowTextLeft}>{income.name}:</Text>
-                  <Text style={styles.cardRowTextLeft}>
+                  <Text style={styles.rowTextLeft}>{income.name}:</Text>
+                  <Text style={styles.rowTextLeft}>
                     ${income.amount} {income.type ? `(${income.type})` : ''}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'column', width: '50%' }}>
-                  <Text style={styles.cardRowTextRight}>{income.expected_date}th</Text>
+                  <Text style={styles.rowTextRight}>{income.expected_date}th</Text>
                   {income.received ? (
-                    <Text style={styles.cardRowTextRight}>Received</Text>
+                    <Text style={styles.rowTextRight}>Received</Text>
                   ) : (
                     <TouchableOpacity
-                      style={styles.tablePayButton}
+                      style={styles.payButton}
                       onPress={() =>
                         actions.handleLogClick(
                           income.amount,
@@ -51,7 +51,7 @@ export default function RecurringIncomeTable({
                         )
                       }
                     >
-                      <Text style={styles.tablePayButtonText}>Log</Text>
+                      <Text style={styles.payButtonText}>Log</Text>
                     </TouchableOpacity>
                   )}
                 </View>

@@ -21,7 +21,7 @@ export default function FormAmountField({ control, name, error }: {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={styles.transInput}
+            style={styles.inputField}
             onChangeText={onChange}
             onBlur={onBlur}
             keyboardType="decimal-pad"
@@ -32,7 +32,7 @@ export default function FormAmountField({ control, name, error }: {
           />
         )}
       />
-      {error && <Text style={styles.transErrorText}>Amount is required.</Text>}
+      {error && <Text style={styles.errorMessage}>Amount is required.</Text>}
     </FormField>
   );
 }

@@ -14,40 +14,40 @@ interface Props {
 
 export default function PlannedExpensesList({ data, onPay, creditMap, savingMap }: Props) {
   return (
-    <View style={styles.islandTable}>
+    <View style={styles.tableContainer}>
       {data.length === 0 ? (
         <EmptyListNotice message="No Planned Expenses" />
       ) : (
         <>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardHeaderText}>Planned Expenses</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText}>Planned Expenses</Text>
           </View>
           {data.map((expense) => (
-            <View key={expense.id} style={styles.cardTableRow}>
+            <View key={expense.id} style={styles.tableRow}>
               <View style={{ flexDirection: 'column', width: '50%' }}>
-                <Text style={styles.cardRowTextLeft}>{expense.name}:</Text>
-                <Text style={styles.cardRowTextLeft}>${expense.amount}</Text>
+                <Text style={styles.rowTextLeft}>{expense.name}:</Text>
+                <Text style={styles.rowTextLeft}>${expense.amount}</Text>
               </View>
               {!expense.paid ? (
                 <View style={{ flexDirection: 'column', width: '50%' }}>
-                  <Text style={styles.cardRowTextRight}>{actions.getReadableDate(expense.paid_date)}</Text>
-                  <TouchableOpacity onPress={() => onPay(expense)} style={styles.tablePayButton}>
-                    <Text style={styles.tablePayButtonText}>Pay</Text>
+                  <Text style={styles.rowTextRight}>{actions.getReadableDate(expense.paid_date)}</Text>
+                  <TouchableOpacity onPress={() => onPay(expense)} style={styles.payButton}>
+                    <Text style={styles.payButtonText}>Pay</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={{ flexDirection: 'column', width: '50%' }}>
                   {expense.credited_to != null && (
-                    <Text style={styles.cardRowTextRight}>
+                    <Text style={styles.rowTextRight}>
                       {creditMap ? creditMap.get(expense.credited_to)?.name ?? '' : ''} Paid
                     </Text>
                   )}
                   {expense.withdrawn_from != null && (
-                    <Text style={styles.cardRowTextRight}>
+                    <Text style={styles.rowTextRight}>
                       Paid from {savingMap ? savingMap.get(expense.withdrawn_from)?.name ?? '' : ''}
                     </Text>
                   )}
-                  <Text style={styles.cardRowTextRight}>{actions.getReadableDate(expense.paid_date)}</Text>
+                  <Text style={styles.rowTextRight}>{actions.getReadableDate(expense.paid_date)}</Text>
                 </View>
               )}
             </View>

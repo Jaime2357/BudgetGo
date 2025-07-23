@@ -3,275 +3,270 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
-  scrollableContainer: {
+  scrollViewContainer: {
     paddingTop: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  contentContainer: {
-    backgroundColor: 'black',
-    width: '100%',
-    alignItems: 'center',
+  innerContent: {
+    backgroundColor: "black",
+    width: "100%",
+    alignItems: "center",
     paddingTop: 20,
+    paddingBottom: 20,
     borderTopStartRadius: 30,
     borderTopEndRadius: 30,
-    paddingBottom: 20
   },
-  welcomeHeader: {
+
+  headerContainer: {
     marginBottom: 25,
     paddingVertical: 13,
-    fontFamily: 'Tektur',
-    alignItems: 'center',
+    alignItems: "center",
   },
-  welcomeText: {
+  headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    fontFamily: 'Tektur',
-    color: '#fff',
+    fontWeight: "bold",
+    fontFamily: "Tektur",
+    color: "#fff",
     marginBottom: 4,
+    textAlign: "center",
   },
-  welcomeSubtext: {
+  headerSubtitle: {
     fontSize: 16,
-    color: '#ccc',
+    color: "#ccc",
+    textAlign: "center",
   },
-  islandBox: {
-    backgroundColor: 'rgba(35, 35, 35, 0.9)',
-    borderColor: 'rgba(74, 144, 226, 0.18)',
+
+  contentBox: {
+    backgroundColor: "rgba(35, 35, 35, 0.9)",
+    borderColor: "rgba(74, 144, 226, 0.18)",
     borderWidth: 1,
     borderRadius: 30,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 10,
     marginVertical: 17,
-    width: '90%',
+    width: "90%",
     aspectRatio: 1.5,
-    overflow: 'hidden',
-    padding: '5%',
+    overflow: "hidden",
+    padding: "5%",
   },
-  islandTable: {
-    backgroundColor: 'rgba(35, 35, 35, 0.9)',
+  tableContainer: {
+    backgroundColor: "rgba(35, 35, 35, 0.9)",
     borderRadius: 30,
     marginVertical: 17,
-    width: '90%',
-    overflow: 'hidden',
+    width: "90%",
+    overflow: "hidden",
   },
-  extendedIslandTable: {
-    backgroundColor: 'rgba(35, 35, 35, 0.92)',
-    borderColor: 'rgba(74, 144, 226, 0.18)',
+  extendedTableContainer: {
+    backgroundColor: "rgba(35, 35, 35, 0.92)",
+    borderColor: "rgba(74, 144, 226, 0.18)",
     borderWidth: 1,
     borderRadius: 30,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 10,
     marginVertical: 17,
-    width: '90%',
+    width: "90%",
     aspectRatio: 0.5,
-    overflow: 'hidden'
+    overflow: "hidden",
   },
-  cardHeader: {
+
+  tableHeader: {
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: 'rgba(74, 144, 226, 0.18)',
+    backgroundColor: "rgba(74, 144, 226, 0.18)",
   },
-  cardHeaderText: {
+  tableHeaderText: {
     fontSize: 20,
-    fontFamily: 'Tektur-Head',
-    color: 'white',
+    fontFamily: "Tektur-Head",
+    color: "white",
   },
-  cardTableRow: {
+  tableRow: {
     flex: 1,
+    flexDirection: "row",
     paddingHorizontal: 20,
     paddingVertical: 13,
     borderBottomWidth: 1,
-    width: '95%',
-    borderBottomColor: 'white',
-    alignSelf: 'center',
-    flexDirection: 'row',
+    borderBottomColor: "white",
+    width: "95%",
+    alignSelf: "center",
   },
-  cardRowTextLeft: {
+  rowTextLeft: {
     fontSize: 15,
-    fontFamily: 'Tektur-Sub',
-    color: 'white',
+    fontFamily: "Tektur-Sub",
+    color: "white",
     marginVertical: 2,
   },
-  cardRowTextRight: {
+  rowTextRight: {
     fontSize: 15,
-    fontFamily: 'Tektur-Sub',
+    fontFamily: "Tektur-Sub",
+    color: "white",
     marginVertical: 2,
-    color: 'white',
-    textAlign: 'right',
+    textAlign: "right",
   },
-  tablePayButton: {
+
+  payButton: {
     paddingVertical: 2,
     marginVertical: 2,
-    width: '50%',
-    height: '50%',
-    backgroundColor: 'rgba(74, 144, 226, 0.18)',
+    width: "50%",
+    height: "50%",
+    backgroundColor: "rgba(74, 144, 226, 0.18)",
     borderRadius: 8,
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
+    justifyContent: "center",
+    alignSelf: "flex-end",
   },
-  tablePayButtonText: {
-    color: 'white',
+  payButtonText: {
+    color: "white",
     fontSize: 12,
-    fontFamily: 'Tektur-Sub',
-    textAlign: 'center',
+    fontFamily: "Tektur-Sub",
+    textAlign: "center",
   },
-  transWelcomeHeader: {
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  transWelcomeText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    fontFamily: 'Tektur',
-    color: '#fff',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  transWelcomeSubtext: {
-    fontSize: 16,
-    color: '#ccc',
-    textAlign: 'center',
-  },
-  transactionCardForm: {
-    backgroundColor: '#181818',
-    width: '94%',
-    alignItems: 'center',
+
+  formCard: {
+    backgroundColor: "#181818",
+    width: "94%",
+    alignItems: "center",
     paddingTop: 26,
     paddingBottom: 38,
     marginBottom: 40,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     borderRadius: 36,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.13,
     shadowRadius: 32,
     elevation: 12,
   },
-  transFieldBlock: {
-    width: '100%',
-    alignItems: 'center',
+  formFieldBlock: {
+    width: "100%",
+    alignItems: "center",
     marginBottom: 16,
   },
-  transTitle: {
+  formTitle: {
     fontSize: 20,
-    color: '#aad1fa',
-    fontFamily: 'Tektur-Sub',
+    color: "#aad1fa",
+    fontFamily: "Tektur-Sub",
     margin: 10,
     paddingLeft: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
-  transSubtitle: {
+  formSubtitle: {
     fontSize: 14,
-    color: 'white',
-    fontFamily: 'Tektur-Sub',
+    color: "white",
+    fontFamily: "Tektur-Sub",
     margin: 10,
     paddingHorizontal: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
-  transLabel: {
+  formLabel: {
     fontSize: 16,
-    color: '#aad1fa',
-    fontFamily: 'Tektur-Sub',
+    color: "#aad1fa",
+    fontFamily: "Tektur-Sub",
     margin: 10,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     paddingLeft: 8,
   },
-  transInput: {
-    backgroundColor: '#232323',
+
+  inputField: {
+    backgroundColor: "#232323",
     borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.18)',
+    borderColor: "rgba(74, 144, 226, 0.18)",
     borderRadius: 10,
-    color: 'white',
+    color: "white",
     paddingHorizontal: 14,
     paddingVertical: 8,
     margin: 12,
-    fontFamily: 'Tektur-Sub',
+    fontFamily: "Tektur-Sub",
     fontSize: 16,
     width: 260,
   },
-  transValue: {
-    backgroundColor: '#232323',
-    color: 'white',
+  inputFieldNoBorder: {
+    backgroundColor: "#232323",
+    color: "white",
     paddingHorizontal: 14,
     marginHorizontal: 12,
-    fontFamily: 'Tektur-Sub',
+    fontFamily: "Tektur-Sub",
     fontSize: 16,
     width: 260,
   },
-  transPickerWrapper: {
+
+  pickerContainer: {
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
     borderRadius: 10,
-    backgroundColor: '#232323',
+    backgroundColor: "#232323",
     width: 260,
     aspectRatio: 5,
     margin: 10,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
-  transPickerInput: {
-    color: 'white',
+  pickerText: {
+    color: "white",
     fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    fontFamily: 'Tektur'
+    fontFamily: "Tektur",
   },
-  transErrorText: {
-    color: '#fa6d6d',
+
+  errorMessage: {
+    color: "#fa6d6d",
     fontSize: 13,
     marginBottom: 6,
   },
-  checkbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#232323',
+
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#232323",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.18)',
+    borderColor: "rgba(74, 144, 226, 0.18)",
     paddingHorizontal: 12,
     paddingVertical: 10,
     width: 260,
   },
-  transDateButton: {
-    backgroundColor: '#222',
+
+  dateButton: {
+    backgroundColor: "#222",
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginTop: 6,
     marginBottom: 8,
-    alignItems: 'center',
+    alignItems: "center",
     width: 260,
   },
-  transDateButtonText: {
-    color: '#aad1fa',
+  dateButtonText: {
+    color: "#aad1fa",
     fontSize: 16,
-    fontFamily: 'Tektur-Sub',
-    textAlign: 'center',
+    fontFamily: "Tektur-Sub",
+    textAlign: "center",
   },
-  transSubmitButton: {
+
+  submitButton: {
     marginTop: 26,
-    backgroundColor: '#5294ec',
+    backgroundColor: "#5294ec",
     borderRadius: 13,
     paddingVertical: 12,
     paddingHorizontal: 44,
-    alignSelf: 'center',
-    shadowColor: '#000',
+    alignSelf: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.11,
     shadowRadius: 9,
     elevation: 8,
   },
-  transSubmitButtonText: {
-    color: '#fff',
-    fontFamily: 'Tektur-Head',
+  submitButtonText: {
+    color: "#fff",
+    fontFamily: "Tektur-Head",
     fontSize: 17,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 

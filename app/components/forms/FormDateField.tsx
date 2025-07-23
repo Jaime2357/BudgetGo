@@ -18,8 +18,8 @@ export default function FormDateField({ control, name, showPicker, setShowPicker
         name={name}
         render={({ field: { onChange, value } }) => (
           <View>
-            <TouchableOpacity style={styles.transDateButton} onPress={() => setShowPicker(true)}>
-              <Text style={styles.transDateButtonText}>
+            <TouchableOpacity style={styles.dateButton} onPress={() => setShowPicker(true)}>
+              <Text style={styles.dateButtonText}>
                 {value ? new Date(value).toLocaleString() : 'Pick a date'}
               </Text>
             </TouchableOpacity>

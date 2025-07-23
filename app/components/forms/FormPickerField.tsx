@@ -21,7 +21,7 @@ export default function FormPickerField({ control, name, label, items, placehold
         name={name}
         rules={{ required: true }}
         render={({ field }) => (
-          <View style={styles.transPickerWrapper}>
+          <View style={styles.pickerContainer}>
             <RNPickerSelect
               onValueChange={field.onChange}
               items={items}

@@ -1,15 +1,16 @@
-import { styles } from '@/styles/global';
+import { modalStyles, styles } from '@/styles/global';
 import { useFocusEffect } from 'expo-router';
 import React, { useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   CreditAccount,
+  PickerItem,
   PlanExpenses,
   RecExpenses,
   SavingAccount,
-  Transaction,
+  Transaction
 } from '@/types/typeDefs';
 
 import initDB from '../database/dbInit';
@@ -17,6 +18,7 @@ import accountRequest from '../database/dbReq';
 
 import PaySingle from '../components/payButtons/spendModal';
 import PayRec from '../components/recPayButtons/recSpendModal';
+import SpendInsertModalForm from '../components/spendingScreen/SpendInsetModalForm';
 import TransactionList from '../components/spendingScreen/TransactionList'; // unique to SpendingScreen
 import PlannedExpensesList from '../components/tables/PlannedExpensesList';
 import RecurringExpensesList from '../components/tables/RecurringExpensesList';
@@ -28,8 +30,8 @@ export default function SpendingScreen() {
   const [allReccuring, setAllReccuring] = useState<RecExpenses[]>([]);
   const [allPLanned, setAllPLanned] = useState<PlanExpenses[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [savingNames, setSavingNames] = useState<{ label: string; value: number }[]>([]);
-  const [creditNames, setCreditNames] = useState<{ label: string; value: number }[]>([]);
+  const [savingNames, setSavingNames] = useState<PickerItem[]>([]);
+  const [creditNames, setCreditNames] = useState<PickerItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   // Modal States
@@ -37,6 +39,7 @@ export default function SpendingScreen() {
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
   const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -82,15 +85,15 @@ export default function SpendingScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#1A3259' }} edges={['top']}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.scrollableContainer}
+        contentContainerStyle={styles.scrollViewContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
       >
-        <View style={styles.welcomeHeader}>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.welcomeSubtext}>Let's look at your finances</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Welcome Back</Text>
+          <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
         </View>
 
-        <View style={styles.contentContainer}>
+        <View style={styles.innerContent}>
           <TransactionList
             transactions={transactions}
             credit={credit}
@@ -110,6 +113,25 @@ export default function SpendingScreen() {
           />
         </View>
       </ScrollView>
+
+      <TouchableOpacity
+        style={modalStyles.fabStyle}
+        onPress={() => setMenuOpen(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={{ fontSize: 32, color: '#fff', fontWeight: 'bold' }}>＋</Text>
+      </TouchableOpacity>
+
+      <SpendInsertModalForm
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSuccess={() => {
+          setMenuOpen(false);
+          setupAndFetch();
+        }}
+        savingOptions={savingNames}
+        creditOptions={creditNames}
+      />
 
       {activeRecRecord && (
         <PayRec

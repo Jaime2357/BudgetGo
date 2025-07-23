@@ -92,7 +92,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                 <TouchableWithoutFeedback>
                     <View style={modalStyles.menuBox}>
                         <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }} keyboardShouldPersistTaps="always">
-                            <Text style={styles.transTitle}>
+                            <Text style={styles.formTitle}>
                                 Add New Income
                             </Text>
 
@@ -129,7 +129,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                     rules={{ required: 'Name is required' }}
                                     render={({ field }) => (
                                         <TextInput
-                                            style={styles.transInput}
+                                            style={styles.inputField}
                                             onChangeText={field.onChange}
                                             value={field.value}
                                             placeholder="Enter Income Name"
@@ -145,7 +145,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                     name="type"
                                     render={({ field }) => (
                                         <TextInput
-                                            style={styles.transInput}
+                                            style={styles.inputField}
                                             onChangeText={field.onChange}
                                             value={field.value}
                                             placeholder="Enter Income Type"
@@ -166,7 +166,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                     }}
                                     render={({ field }) => (
                                         <TextInput
-                                            style={styles.transInput}
+                                            style={styles.inputField}
                                             keyboardType="decimal-pad"
                                             onChangeText={field.onChange}
                                             value={String(field.value ?? '')}
@@ -183,7 +183,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                     name="deposited_to"
                                     rules={{ required: true }}
                                     render={({ field }) => (
-                                        <View style={styles.transPickerWrapper}>
+                                        <View style={styles.pickerContainer}>
                                             <RNPickerSelect
                                                 onValueChange={field.onChange}
                                                 value={field.value}
@@ -229,10 +229,10 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                         render={({ field }) => (
                                             <View>
                                                 <TouchableOpacity
-                                                    style={styles.transDateButton}
+                                                    style={styles.dateButton}
                                                     onPress={() => setShowPicker(true)}
                                                 >
-                                                    <Text style={styles.transDateButtonText}>
+                                                    <Text style={styles.dateButtonText}>
                                                         {field.value ? new Date(field.value).toLocaleDateString() : 'Pick a date'}
                                                     </Text>
                                                 </TouchableOpacity>
@@ -260,7 +260,7 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                                         name="expected_date"
                                         rules={{ required: true }}
                                         render={({ field }) => (
-                                            <View style={styles.transPickerWrapper}>
+                                            <View style={styles.pickerContainer}>
                                                 <RNPickerSelect
                                                     onValueChange={field.onChange}
                                                     items={Array.from({ length: 30 }, (_, i) => ({
@@ -278,10 +278,10 @@ const IncomeModalForm = ({ visible, onClose, onSuccess, savingOptions }: {
                             )}
 
                             <TouchableOpacity
-                                style={styles.transSubmitButton}
+                                style={styles.submitButton}
                                 onPress={handleSubmit(onSubmit)}
                             >
-                                <Text style={styles.transSubmitButtonText}>
+                                <Text style={styles.submitButtonText}>
                                     {loading ? 'Submitting...' : 'Submit'}
                                 </Text>
                             </TouchableOpacity>

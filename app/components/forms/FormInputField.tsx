@@ -17,7 +17,7 @@ export default function FormInputField({ control, name, label, placeholder }: {
         name={name}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={styles.transInput}
+            style={styles.inputField}
             onChangeText={onChange}
             onBlur={onBlur}
             value={value}

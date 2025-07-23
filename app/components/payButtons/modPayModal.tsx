@@ -82,7 +82,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
 
         try {
 
-            await dataPost.postPlanSpend(
+            await dataPost.logPlanSpend(
                 record.id, name, type,
                 Number(amount), creditedTo, withdrawnFrom, actions.convertDate(date))
 
@@ -117,7 +117,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -134,7 +134,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                     name="amount"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={String(value ?? '')}
@@ -151,7 +151,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                     name="type"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -169,10 +169,10 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                     render={({ field: { onChange, value } }) => (
                         <View>
                             <TouchableOpacity
-                                style={styles.transDateButton}
+                                style={styles.dateButton}
                                 onPress={() => setShowPicker(true)}
                             >
-                                <Text style={styles.transDateButtonText}>
+                                <Text style={styles.dateButtonText}>
                                     {value ? new Date(value).toLocaleString() : 'Pick a date'}
                                 </Text>
                             </TouchableOpacity>
@@ -236,7 +236,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                         control={control}
                         rules={{ required: true }}
                         render={({ field: { onChange, value } }) => (
-                            <View style={styles.transPickerWrapper}>
+                            <View style={styles.pickerContainer}>
                                 <RNPickerSelect
                                     onValueChange={onChange}
                                     value={value}
@@ -258,7 +258,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                         control={control}
                         rules={{ required: true }}
                         render={({ field: { onChange, value } }) => (
-                            <View style={styles.transPickerWrapper}>
+                            <View style={styles.pickerContainer}>
                                 <RNPickerSelect
                                     onValueChange={onChange}
                                     value={value}
@@ -281,7 +281,7 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
                         <TouchableOpacity
                             onPress={() => onChange(!value)}
                             activeOpacity={0.8}
-                            style={styles.checkbox}
+                            style={styles.checkboxRow}
                         >
                             <View
                                 style={{
@@ -311,11 +311,11 @@ const ModPayModal: React.FC<DefaultRecProps> = ({ record, onSuccess, savingOptio
 
 
             <TouchableOpacity
-                style={styles.transSubmitButton}
+                style={styles.submitButton}
                 onPress={handleSubmit(onSubmit)}
                 disabled={loading}
             >
-                <Text style={styles.transSubmitButtonText}>
+                <Text style={styles.submitButtonText}>
                     {loading ? 'Submitting...' : 'Submit'}
                 </Text>
             </TouchableOpacity>

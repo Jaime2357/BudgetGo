@@ -17,16 +17,16 @@ export default function TransactionList({ transactions, credit, saving }: Props)
   }
 
   return (
-    <View style={styles.extendedIslandTable}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardHeaderText}>Transactions</Text>
+    <View style={styles.extendedTableContainer}>
+      <View style={styles.tableHeader}>
+        <Text style={styles.tableHeaderText}>Transactions</Text>
       </View>
       <ScrollView nestedScrollEnabled contentContainerStyle={{ paddingBottom: 40 }} style={{ flexGrow: 1 }}>
         {transactions.map((transaction) => (
-          <View key={transaction.id} style={styles.cardTableRow}>
+          <View key={transaction.id} style={styles.tableRow}>
             <View style={{ flexDirection: 'column', width: '50%' }}>
-              <Text style={styles.cardRowTextLeft}>{transaction.name}:</Text>
-              <Text style={styles.cardRowTextLeft}>
+              <Text style={styles.rowTextLeft}>{transaction.name}:</Text>
+              <Text style={styles.rowTextLeft}>
                 ${transaction.amount} ({transaction.type})
               </Text>
             </View>
@@ -34,30 +34,30 @@ export default function TransactionList({ transactions, credit, saving }: Props)
             <View style={{ flexDirection: 'column', width: '50%' }}>
               {transaction.credited_to !== null && (
                 <>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     {getCreditName(credit, transaction.credited_to)} Paid
                   </Text>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     {actions.getReadableDate(transaction.transaction_date)}
                   </Text>
                 </>
               )}
               {transaction.withdrawn_from !== null && transaction.deposited_to === null && (
                 <>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     Paid From {getSavingName(saving, transaction.withdrawn_from)}
                   </Text>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     {actions.getReadableDate(transaction.transaction_date)}
                   </Text>
                 </>
               )}
               {transaction.withdrawn_from !== null && transaction.deposited_to !== null && (
                 <>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     {getSavingName(saving, transaction.withdrawn_from)} {'>'} {getSavingName(saving, transaction.deposited_to)}
                   </Text>
-                  <Text style={styles.cardRowTextRight}>
+                  <Text style={styles.rowTextRight}>
                     {actions.getReadableDate(transaction.transaction_date)}
                   </Text>
                 </>

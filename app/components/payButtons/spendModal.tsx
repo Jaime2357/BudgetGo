@@ -56,7 +56,7 @@ const PaySingle: React.FC<PayRecProps> = ({
                             showsVerticalScrollIndicator={false}
                         >
 
-                            <Text style={styles.transTitle}>
+                            <Text style={styles.formTitle}>
                                 Planned Payment: {record.name}
                             </Text>
 
@@ -68,7 +68,7 @@ const PaySingle: React.FC<PayRecProps> = ({
                                         <TouchableOpacity
                                             onPress={() => onChange(!value)}
                                             activeOpacity={0.8}
-                                            style={styles.checkbox}
+                                            style={styles.checkboxRow}
                                         >
                                             <View
                                                 style={{

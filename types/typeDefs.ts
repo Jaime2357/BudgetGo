@@ -88,4 +88,9 @@ export interface CreditCardProps {
     imageKey: string;
 }
 
+export type PickerItem = {
+    label: string;
+    value: number;
+};
+
 export type CardComponentProps = SavingsCardProps | CreditCardProps;

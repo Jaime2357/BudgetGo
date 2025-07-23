@@ -1,6 +1,6 @@
 import db from "./dbOpen";
 
-export async function postSpend(
+export async function newSpend(
     name: string,
     type: string | null,
     amount: number,
@@ -69,7 +69,7 @@ export async function postSpend(
     console.log('Spend Successfully Posted')
 }
 
-export async function postRecSpend(
+export async function logRecSpend(
     id: number,
     name: string,
     type: string | null,
@@ -119,7 +119,7 @@ export async function postRecSpend(
     console.log('Monthly Spend Successfully Posted')
 }
 
-export async function postPlanSpend(
+export async function logPlanSpend(
     id: number,
     name: string,
     type: string | null,
@@ -365,6 +365,42 @@ export async function postDeposit(
     console.log('Deposit Successfully Posted')
 }
 
+export async function postPlannedExpense(
+    name: string,
+    type: string | null,
+    amount: number,
+    paid_date: string,
+    credited_to: number | null,
+    withdrawn_from: number | null,
+): Promise<void> {
+
+    console.log(paid_date)
+
+    await db.runAsync(
+        `INSERT INTO planned_expenses (name, type, amount, paid, paid_date, credited_to, withdrawn_from) VALUES (?, ?, ?, false, ?, ?, ?)`,
+        [name, type, Number(amount), paid_date, credited_to, withdrawn_from]);
+
+    console.log('Planned Expense Successfully Posted')
+}
+
+export async function postRecExpense(
+    name: string,
+    type: string | null,
+    amount: number,
+    credited_to: number,
+    reccurring_date: number
+): Promise<void> {
+
+    console.log(name, type, amount, credited_to, reccurring_date)
+
+    await db.runAsync(
+        `INSERT INTO reccurring_expenses (name, type, amount, paid_for_month, credited_to, reccurring_date) VALUES (?, ?, ?, false, ?, ?)`,
+        [name, type, Number(amount), credited_to, reccurring_date]
+    );
+
+    console.log('Reccurring Expense Successfully Posted')
+}
+
 export async function monthlyPreset() {
 
     await db.withTransactionAsync(async () => {
@@ -372,7 +408,7 @@ export async function monthlyPreset() {
         await db.runAsync(`UPDATE reccurring_expenses SET monthly_reset = false`)
     })
 
-    console.log( 'Monthly Preset Successful'  )
+    console.log('Monthly Preset Successful')
 }
 
 export async function monthlyReset() {
@@ -382,20 +418,22 @@ export async function monthlyReset() {
         await db.runAsync(`UPDATE reccurring_expenses SET paid_for_month = false, monthly_reset = true WHERE monthly_reset = false`)
     })
 
-    console.log( 'Monthly Reset Successful'  )
+    console.log('Monthly Reset Successful')
 
 }
 
 export default {
-    postSpend,
-    postRecSpend,
-    postPlanSpend,
+    newSpend,
+    logRecSpend,
+    logPlanSpend,
     updateRecSpend,
     updatePlanSpend,
     postTransfer,
     postIncome,
     postRecIncome,
     postDeposit,
+    postPlannedExpense,
+    postRecExpense,
     monthlyPreset,
     monthlyReset
 };

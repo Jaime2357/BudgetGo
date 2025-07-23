@@ -52,7 +52,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
 
         try {
 
-            await dataPost.postRecSpend(
+            await dataPost.logRecSpend(
                 record.id, name, type,
                 Number(amount), credited_to, actions.convertDate(date))
 
@@ -82,7 +82,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -99,7 +99,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                     name="amount"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={String(value ?? '')}
@@ -116,7 +116,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                     name="type"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            style={styles.transInput}
+                            style={styles.inputField}
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -134,10 +134,10 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                     render={({ field: { onChange, value } }) => (
                         <View>
                             <TouchableOpacity
-                                style={styles.transDateButton}
+                                style={styles.dateButton}
                                 onPress={() => setShowPicker(true)}
                             >
-                                <Text style={styles.transDateButtonText}>
+                                <Text style={styles.dateButtonText}>
                                     {value ? new Date(value).toLocaleString() : 'Pick a date'}
                                 </Text>
                             </TouchableOpacity>
@@ -166,7 +166,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                     name="credited_to"
                     rules={{ required: true }}
                     render={({ field }) => (
-                        <View style={styles.transPickerWrapper}>
+                        <View style={styles.pickerContainer}>
                             <RNPickerSelect
                                 onValueChange={field.onChange}
                                 value={field.value}
@@ -187,7 +187,7 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
                         <TouchableOpacity
                             onPress={() => onChange(!value)}
                             activeOpacity={0.8}
-                            style={styles.checkbox}
+                            style={styles.checkboxRow}
                         >
                             <View
                                 style={{
@@ -217,11 +217,11 @@ const ModRecModal: React.FC<DefaultRecProps> = ({ record, onSuccess, creditOptio
 
 
             <TouchableOpacity
-                style={styles.transSubmitButton}
+                style={styles.submitButton}
                 onPress={handleSubmit(onSubmit)}
                 disabled={loading}
             >
-                <Text style={styles.transSubmitButtonText}>
+                <Text style={styles.submitButtonText}>
                     {loading ? 'Submitting...' : 'Submit'}
                 </Text>
             </TouchableOpacity>

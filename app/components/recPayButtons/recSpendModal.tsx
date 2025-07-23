@@ -45,7 +45,7 @@ const PayRec: React.FC<PayRecProps> = ({ record, visible, onClose, onSuccess, cr
                             showsVerticalScrollIndicator={false}
                         >
 
-                            <Text style={styles.transTitle}>
+                            <Text style={styles.formTitle}>
                                 Reccuring Payment: {record.name}
                             </Text>
 
@@ -57,7 +57,7 @@ const PayRec: React.FC<PayRecProps> = ({ record, visible, onClose, onSuccess, cr
                                         <TouchableOpacity
                                             onPress={() => onChange(!value)}
                                             activeOpacity={0.8}
-                                            style={styles.checkbox}
+                                            style={styles.checkboxRow}
                                         >
                                             <View
                                                 style={{
