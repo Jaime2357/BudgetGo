@@ -1,7 +1,8 @@
+import dataDrop from '@/app/database/dbDrop';
 import { styles } from '@/styles/global';
 import { CreditAccount, SavingAccount, Transaction } from '@/types/typeDefs';
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import actions, { getCreditName, getSavingName } from '../actions';
 import EmptyListNotice from '../global/EmptyListNotice';
 
@@ -9,9 +10,45 @@ interface Props {
   transactions: Transaction[];
   credit: Map<number, CreditAccount>;
   saving: Map<number, SavingAccount>;
+  refreshOnDelete: () => void;
 }
 
-export default function TransactionList({ transactions, credit, saving }: Props) {
+export default function TransactionList({ transactions, credit, saving, refreshOnDelete }: Props) {
+
+  const onTransactionDelete = async (id: number) => {
+
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this Reccurring Expense? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => {
+          },
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+
+            try {
+              await dataDrop.dropTransaction(id);
+              Alert.alert('Success', 'Expense deleted successfully!', [
+                { text: 'OK' },
+              ]);
+            } catch (e) {
+              Alert.alert('Error', 'Something went wrong while deleting.');
+            } finally {
+              refreshOnDelete
+            }
+          },
+        },
+      ],
+      { cancelable: false } // User must tap a button explicitly
+    );
+  }
+
   if (transactions.length === 0) {
     return <EmptyListNotice message="No Transactions Logged" />;
   }
@@ -62,6 +99,12 @@ export default function TransactionList({ transactions, credit, saving }: Props)
                   </Text>
                 </>
               )}
+              <TouchableOpacity
+                onPress={() => onTransactionDelete(transaction.id)}
+                style={[styles.tableButton, { backgroundColor: '#cc4444', alignSelf: 'flex-end' }]}
+              >
+                <Text style={[styles.tableButtonText, { color: 'white' }]}>Delete</Text>
+              </TouchableOpacity>
             </View>
           </View>
         ))}

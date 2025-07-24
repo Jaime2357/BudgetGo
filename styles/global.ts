@@ -26,8 +26,7 @@ export const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "bold",
-    fontFamily: "Tektur",
+    fontFamily: "Tektur-Head",
     color: "#fff",
     marginBottom: 4,
     textAlign: "center",
@@ -35,6 +34,7 @@ export const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 16,
     color: "#ccc",
+    fontFamily: "Tektur-Sub",
     textAlign: "center",
   },
 
@@ -111,17 +111,22 @@ export const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  payButton: {
-    paddingVertical: 2,
-    marginVertical: 2,
-    width: "50%",
-    height: "50%",
+  tableButton: {
+    marginTop: 5,
     backgroundColor: "rgba(74, 144, 226, 0.18)",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignSelf: "flex-end",
+    borderRadius: 13,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.11,
+    shadowRadius: 9,
+    elevation: 8,
+    marginLeft: 4,
+    flex: 0,
+    minWidth: 60
   },
-  payButtonText: {
+  tableButtonText: {
     color: "white",
     fontSize: 12,
     fontFamily: "Tektur-Sub",
@@ -263,6 +268,37 @@ export const styles = StyleSheet.create({
     elevation: 8,
   },
   submitButtonText: {
+    color: "#fff",
+    fontFamily: "Tektur-Head",
+    fontSize: 17,
+    textAlign: "center",
+  },
+
+  deleteButton: {
+    marginTop: 26,
+    backgroundColor: "#ec5252ff",
+    borderRadius: 13,
+    paddingVertical: 12,
+    paddingHorizontal: 44,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.11,
+    shadowRadius: 9,
+    elevation: 8,
+  },
+  miniDeleteButton: {
+    marginTop: 26,
+    backgroundColor: "#ec5252ff",
+    borderRadius: 13,
+    paddingVertical: 12,
+    paddingHorizontal: 44,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.11,
+    shadowRadius: 9,
+    elevation: 8,
+  },
+  deleteButtonText: {
     color: "#fff",
     fontFamily: "Tektur-Head",
     fontSize: 17,

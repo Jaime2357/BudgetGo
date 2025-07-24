@@ -64,9 +64,41 @@ export const getCreditName = (credit: Map<number, CreditAccount>, id?: number | 
 export const getSavingName = (saving: Map<number, SavingAccount>, id?: number | null) =>
     id ? saving.get(id)?.name ?? '' : '';
 
+// Get Ordinal Suffix
+
+export function getOrdinalSuffix(n: number) {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return 'th';
+  switch (n % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+
+// Get Time of Day Identifier
+export function getTimeOfDay(){
+
+    const today = new Date();
+    const time = today.getHours();
+
+    if (time >= 0 && time <= 11){
+      return 'Morning';
+    }
+    else if (time >= 12 && time <= 17){
+      return 'Afternoon';
+    }
+    else{
+      return 'Evening';
+    }
+}
+
 export default {
     getReadableDate,
     convertDate,
     getFullDate,
-    handleLogClick
+    handleLogClick,
+    getOrdinalSuffix,
+    getTimeOfDay
 }

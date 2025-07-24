@@ -10,7 +10,9 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    Tektur: require('@/assets/fonts/Tektur/Tektur-Black.ttf'),
+    'Tektur-Head': require('@/assets/fonts/Tektur/Tektur-Bold.ttf'),
+    'Tektur-Sub': require('@/assets/fonts/Tektur/Tektur-Medium.ttf'),
+    'Tektur': require('@/assets/fonts/Tektur/Tektur-Black.ttf'),
   });
 
   if (!loaded) {

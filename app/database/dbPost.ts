@@ -1,5 +1,52 @@
 import db from "./dbOpen";
 
+export async function addNewAccount(name: string, balance: number, image_uri: string | null) {
+
+    await db.runAsync(`INSERT INTO saving_accounts (name, balance, image_uri) VALUES (?, ?, ?)`, 
+        [name, balance, image_uri]);
+    console.log('New Account Added');
+}
+
+export async function addNewCredit(name: string, current_balance: number, image_uri: string | null) {
+
+    await db.runAsync(`INSERT INTO credit_accounts (name, current_balance, image_uri) VALUES (?, ?, ?)`, 
+        [name, current_balance, image_uri]);
+    console.log('New Credit Card Added');
+}
+
+export async function updateSavingAccount(
+    id: number,
+    name: string, 
+    balance: number,
+    threshold: number,
+    modifications: number,
+    image_uri: string | null
+){
+
+    await db.runAsync(`UPDATE saving_accounts 
+        SET name = ?, balance = ?, threshold = ?, modifications = ?, image_uri = ? WHERE id = ?`,
+    [name, balance, threshold, modifications, image_uri, id])
+
+    console.log('Saving Account Updated')
+
+}
+
+export async function updateCreditAccount(
+    id: number,
+    name: string, 
+    current_balance: number,
+    pending_charges: number,
+    image_uri: string | null
+){
+
+    await db.runAsync(`UPDATE credit_accounts 
+        SET name = ?, current_balance = ?, pending_charges = ?, image_uri = ? WHERE id = ?`,
+    [name, current_balance, pending_charges, image_uri, id])
+
+    console.log('Credit Card Updated')
+
+}
+
 export async function newSpend(
     name: string,
     type: string | null,
@@ -13,9 +60,6 @@ export async function newSpend(
 
     await db.withTransactionAsync(async () => {
 
-        if (!(Number(amount) > 0)) {
-            throw new Error('Transaction amount must be positive');
-        }
         if (credited_to === null && withdrawn_from === null) {
             throw new Error('No payment account ID specified')
         }
@@ -58,7 +102,13 @@ export async function newSpend(
             const currentBal = Number(initBal.current_balance);
             const amt = Number(amount);
 
-            let newBalance = currentBal + amt;
+            let newBalance 
+            if(type = 'credit_payment'){ // Payments deduct from balance
+                newBalance = currentBal - amt;
+            }
+            else{ // Charges add to balance
+                newBalance = currentBal + amt;
+            }
 
             await db.runAsync(
                 'UPDATE credit_accounts SET current_balance = ? WHERE id = ?', [newBalance, credited_to]
@@ -66,7 +116,7 @@ export async function newSpend(
         }
 
     })
-    console.log('Spend Successfully Posted')
+    console.log('Transaction Successfully Posted')
 }
 
 export async function logRecSpend(
@@ -423,6 +473,10 @@ export async function monthlyReset() {
 }
 
 export default {
+    addNewAccount,
+    addNewCredit,
+    updateSavingAccount,
+    updateCreditAccount,
     newSpend,
     logRecSpend,
     logPlanSpend,

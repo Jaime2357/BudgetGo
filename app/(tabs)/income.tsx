@@ -9,6 +9,7 @@ import { Income, RecIncome, SavingAccount } from '@/types/typeDefs';
 import initDB from '../database/dbInit';
 import dataRequest from '../database/dbReq';
 
+import Header from '../components/global/Header';
 import IncomeModalForm from '../components/incomeScreen/IncomeModalForm';
 import IncomeSection from '../components/incomeScreen/IncomeSection';
 import RecurringIncomeTable from '../components/tables/RecurringIncomeTable';
@@ -41,6 +42,12 @@ export default function IncomeScreen() {
         setupAndFetch();
     }, []));
 
+    const refreshOnDelete = async () => {
+        setRefreshing(true);
+        await setupAndFetch();
+        setRefreshing(false);
+    };
+
     const onRefresh = async () => {
         setRefreshing(true);
         await setupAndFetch();
@@ -54,15 +61,13 @@ export default function IncomeScreen() {
                 contentContainerStyle={styles.scrollViewContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
             >
-                <View style={styles.headerContainer}>
-                    <Text style={styles.headerTitle}>Welcome Back</Text>
-                    <Text style={styles.headerSubtitle}>Let&apos;s look at your finances</Text>
-                </View>
+
+                <Header message="Track Your Income" />
 
                 <View style={styles.innerContent}>
-                    <IncomeSection title="Income" data={allIncome} refData={saving} />
-                    <RecurringIncomeTable data={recIncome} refData={saving} title="Recurring Income" />
-                    <IncomeSection title="Pending Income" data={income} refData={saving} />
+                    <IncomeSection title="Income" data={allIncome} refreshOnDelete={refreshOnDelete} />
+                    <RecurringIncomeTable data={recIncome} refData={saving} title="Recurring Income" refreshOnDelete={refreshOnDelete} />
+                    <IncomeSection title="Pending Income" data={income} refreshOnDelete={refreshOnDelete} />
                 </View>
             </ScrollView>
 

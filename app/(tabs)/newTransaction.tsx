@@ -23,6 +23,7 @@ import FormDateField from '../components/forms/FormDateField';
 import FormInputField from '../components/forms/FormInputField';
 import FormPickerField from '../components/forms/FormPickerField';
 import FormRadioGroup from '../components/forms/FormRadioGroup';
+import Header from '../components/global/Header';
 
 interface Transaction {
     name: string;
@@ -54,8 +55,9 @@ export default function NewTransaction() {
     const [loading, setLoading] = useState(false);
 
     const [transTypeRadio, setTransTypeRadio] = useState<RadioButtonType[]>([
-        { id: '1', label: 'Transfer', value: 'transfer', labelStyle: { fontSize: 16, fontFamily: 'Tektur-Sub' } },
-        { id: '2', label: 'Spending', value: 'spending', labelStyle: { fontSize: 16, fontFamily: 'Tektur-Sub' } },
+        { id: '1', label: 'Transfer', value: 'transfer', labelStyle: { fontSize: 14, fontFamily: 'Tektur-Sub' } },
+        { id: '2', label: 'Spending', value: 'spending', labelStyle: { fontSize: 14, fontFamily: 'Tektur-Sub' } },
+        { id: '3', label: 'Credit Payment', value: 'credit_payment', labelStyle: { fontSize: 14, fontFamily: 'Tektur-Sub' } }
     ]);
 
     const [payTypeRadio, setPayTypeRadio] = useState<RadioButtonType[]>([
@@ -112,11 +114,16 @@ export default function NewTransaction() {
 
             if (!credited_to) credited_to = null;
             if (!withdrawn_from) withdrawn_from = null;
-            if (transactionType === 'transfer') type = 'transfer';
+            if (transactionType === 'transfer') type = 'Transfer';
+            if (transactionType === 'credit_payment') type = 'Credit Payment';
 
             if (type === 'transfer' && deposited_to != null && withdrawn_from != null) {
                 await dataPost.postTransfer(name, type, Number(amount), deposited_to, withdrawn_from, actions.convertDate(transaction_date));
-            } else {
+            }
+            else if (transactionType === 'credit_payment') {
+                await dataPost.newSpend(name, type, Number(amount), credited_to, null, actions.convertDate(transaction_date));
+            }
+            else {
                 await dataPost.newSpend(name, type, Number(amount), credited_to, withdrawn_from, actions.convertDate(transaction_date));
             }
 
@@ -137,10 +144,8 @@ export default function NewTransaction() {
                 contentContainerStyle={styles.scrollViewContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
             >
-                <View style={styles.headerContainer}>
-                    <Text style={styles.headerTitle}>Welcome Back</Text>
-                    <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
-                </View>
+                
+                <Header message="Log a New Transaction" />
 
                 <View style={styles.formCard}>
                     <FormInputField control={control} name="name" label="Transaction Name" placeholder="Enter Transaction Name" />
@@ -158,6 +163,10 @@ export default function NewTransaction() {
                     )}
 
                     <FormAmountField control={control} name="amount" error={!!errors.amount} />
+
+                    {transactionType === 'credit_payment' &&
+                        <FormPickerField control={control} name="credited_to" label="Credit Card" items={credit} placeholderLabel="Select Credit Card" />
+                    }
 
                     {transactionType === 'spending' && (
                         <>

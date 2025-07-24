@@ -3,13 +3,15 @@ import db from "./dbOpen";
 const initDB = async (): Promise<void> => {
 
   await db.withTransactionAsync(async () => {
+
     await db.execAsync(
       `CREATE TABLE IF NOT EXISTS saving_accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         balance NUMERIC NOT NULL DEFAULT 0,
         threshold NUMERIC NOT NULL DEFAULT 0,
-        modifications NUMERIC DEFAULT 0
+        modifications NUMERIC DEFAULT 0,
+        image_uri TEXT
       );`
     );
 
@@ -18,8 +20,8 @@ const initDB = async (): Promise<void> => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         current_balance NUMERIC NOT NULL DEFAULT 0,
-        true_balance NUMERIC NOT NULL DEFAULT 0,
-        pending_charges NUMERIC DEFAULT 0
+        pending_charges NUMERIC DEFAULT 0,
+        image_uri TEXT
       );`
     );
 
@@ -33,7 +35,7 @@ const initDB = async (): Promise<void> => {
         monthly_reset BOOLEAN NOT NULL DEFAULT 0,
         credited_to INTEGER,
         reccurring_date INTEGER CHECK (reccurring_date > 0 AND reccurring_date < 32),
-        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id)
+        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id) ON DELETE CASCADE
       );`
     );
 
@@ -47,8 +49,8 @@ const initDB = async (): Promise<void> => {
         paid_date DATE NOT NULL,
         credited_to INTEGER,
         withdrawn_from INTEGER,
-        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id),
-        FOREIGN KEY (withdrawn_from) REFERENCES saving_accounts(id)
+        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (withdrawn_from) REFERENCES saving_accounts(id) ON DELETE CASCADE
       );`
     );
 
@@ -62,7 +64,7 @@ const initDB = async (): Promise<void> => {
         received BOOLEAN DEFAULT 0,
         monthly_reset BOOLEAN NOT NULL DEFAULT 0,
         expected_date INTEGER NOT NULL,
-        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id) ON DELETE CASCADE
       );`
     );
 
@@ -75,7 +77,7 @@ const initDB = async (): Promise<void> => {
         deposited_to INTEGER NOT NULL,
         received BOOLEAN DEFAULT 0,
         paid_date DATE NOT NULL,
-        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id) ON DELETE CASCADE
       );`
     );
 
@@ -89,9 +91,9 @@ const initDB = async (): Promise<void> => {
         withdrawn_from INTEGER,
         deposited_to INTEGER,
         transaction_date DATE NOT NULL,
-        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id),
-        FOREIGN KEY (withdrawn_from) REFERENCES saving_accounts(id),
-        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id)
+        FOREIGN KEY (credited_to) REFERENCES credit_accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (withdrawn_from) REFERENCES saving_accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (deposited_to) REFERENCES saving_accounts(id) ON DELETE CASCADE
       );`
     );
   });

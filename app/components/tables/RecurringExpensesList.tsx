@@ -1,16 +1,56 @@
 import { styles } from '@/styles/global';
 import { RecExpenses } from '@/types/typeDefs';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import EmptyListNotice from '../global/EmptyListNotice';
+
+import dataDrop from '@/app/database/dbDrop';
+import actions from '../actions';
 
 interface Props {
   data: RecExpenses[];
   month?: string; // optional, used on HomeScreen
   onPay: (entry: RecExpenses) => void;
+  refreshOnDelete: () => void;
 }
 
-export default function RecurringExpensesList({ data, month, onPay }: Props) {
+export default function RecurringExpensesList({ data, month, onPay, refreshOnDelete }: Props) {
+
+  const onRecExpenseDelete = async (id: number) => {
+
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this Reccurring Expense? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => {
+            // Optional: do nothing or log cancel
+          },
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+
+            try {
+              await dataDrop.dropRecExpense(id)
+              Alert.alert('Success', 'Expense deleted successfully!', [
+                { text: 'OK' },
+              ]);
+            } catch (e) {
+              Alert.alert('Error', 'Something went wrong while deleting.');
+            } finally {
+              refreshOnDelete
+            }
+          },
+        },
+      ],
+      { cancelable: false } // User must tap a button explicitly
+    );
+  };
+
   return (
     <View style={styles.tableContainer}>
       {data.length === 0 ? (
@@ -34,10 +74,28 @@ export default function RecurringExpensesList({ data, month, onPay }: Props) {
                 <Text style={styles.rowTextLeft}>${expense.amount}</Text>
               </View>
               <View style={{ flexDirection: 'column', width: '50%' }}>
-                <Text style={styles.rowTextRight}>Due {expense.reccurring_date}th</Text>
-                <TouchableOpacity onPress={() => onPay(expense)} style={styles.payButton}>
-                  <Text style={styles.payButtonText}>Pay</Text>
-                </TouchableOpacity>
+                <Text style={styles.rowTextRight}>
+                  Due {expense.reccurring_date}{actions.getOrdinalSuffix(expense.reccurring_date)}
+                  </Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 }}>
+                  {/* Pay Button */}
+                  <TouchableOpacity
+                    onPress={() => onPay(expense)}
+                    style={styles.tableButton}
+                  >
+                    <Text style={styles.tableButtonText}>Pay</Text>
+                  </TouchableOpacity>
+
+                  {/* Delete Button */}
+                  <TouchableOpacity
+                    onPress={() => onRecExpenseDelete(expense.id)}
+                    style={[styles.tableButton, { backgroundColor: '#cc4444' }]}
+                  >
+                    <Text style={[styles.tableButtonText, { color: 'white' }]}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+
               </View>
             </View>
           ))}

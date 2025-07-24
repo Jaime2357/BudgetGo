@@ -1,33 +1,45 @@
 import { CardComponentProps } from '@/types/typeDefs';
-import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 import React from "react";
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { imageMap } from '../../../assets/images/imageMap';
 
 interface CardProps {
   account: CardComponentProps;
+  onAdd?: () => void;
+  onEdit?: () => void;
 }
 
-const CardComponent: React.FC<CardProps> = ({ account }) => {
-  const [loaded] = useFonts({
-    'Tektur-Head': require('@/assets/fonts/Tektur/Tektur-Bold.ttf'),
-    'Tektur-Sub': require('@/assets/fonts/Tektur/Tektur-Medium.ttf'),
-    'Tektur': require('@/assets/fonts/Tektur/Tektur-Black.ttf'),
-  });
+const CardComponent: React.FC<CardProps> = ({ account, onAdd, onEdit }) => {
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+  if (account.type === 'add') {
+    return (
+      <TouchableOpacity style={[styles.cardContainer, styles.addCardContainer]} onPress={onAdd}>
+        <View style={styles.addIconWrapper}>
+          <Ionicons name="add" size={48} color="#888" />
+          <Text style={styles.addCardText}>Add Card</Text>
+        </View>
+      </TouchableOpacity>
+    );
   }
 
   return (
     <View style={styles.cardContainer}>
+
+      {(account.type === 'savings' || account.type === 'credit') && onEdit && (
+        <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+          <Ionicons name="ellipsis-horizontal" size={24} color="white" />
+        </TouchableOpacity>
+      )}
+
       {account.type === 'savings' && (
         <>
           <ImageBackground
-            source={imageMap[account.imageKey]}
+            source={account.image_uri
+              ? { uri: account.image_uri }
+              : imageMap[account.imageKey || 'blue']}
             style={styles.cardBanner}>
-            <Text style={styles.bannerText}>{account.id}: {account.name}</Text>
+            <Text style={styles.bannerText}>{account.name}</Text>
           </ImageBackground>
           <View style={{ flex: 1, flexDirection: 'row', padding: 10 }}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -44,18 +56,22 @@ const CardComponent: React.FC<CardProps> = ({ account }) => {
       {account.type === 'credit' && (
         <>
           <ImageBackground
-            source={imageMap[account.imageKey]}
+            source={account.image_uri
+              ? { uri: account.image_uri }
+              : imageMap[account.imageKey || 'blue']}
             style={styles.cardBanner}>
-            <Text style={styles.bannerText}>{account.id}: {account.name}</Text>
+            <Text style={styles.bannerText}>{account.name}</Text>
           </ImageBackground>
           <View style={{ flex: 1, flexDirection: 'row', padding: 10 }}>
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <Text style={styles.cardBodyHeading}>Balance</Text>
-              <Text style={styles.cardBodyText}>${account.current_balance.toFixed(2)}</Text>
+              <Text style={styles.cardBodyText}>${
+                (Number(account.current_balance) - account.pending_charges).toFixed(2)
+              }</Text>
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
               <Text style={styles.cardBodyHeading}>True Balance</Text>
-              <Text style={styles.cardBodyText}>${account.true_balance.toFixed(2)}</Text>
+              <Text style={styles.cardBodyText}>${account.current_balance.toFixed(2)}</Text>
             </View>
           </View>
         </>
@@ -83,15 +99,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bannerText: {
-    fontSize: 30,
-    fontFamily: 'Tektur-Sub',
+    fontSize: 28,
+    fontFamily: 'Tektur-Head',
     color: 'white',
-    fontWeight: 'bold',
-    backgroundColor: '#00000080',
+    backgroundColor: '#000000be',
     padding: '5%',
     borderRadius: 8,
     alignSelf: 'flex-start',
     margin: 8,
+    maxWidth: '85%'
   },
   infoRow: {
     flex: 1,
@@ -114,7 +130,34 @@ const styles = StyleSheet.create({
     fontFamily: 'Tektur-Sub',
     color: 'white',
     margin: 2,
-  }
+  },
+  addCardContainer: {
+    borderWidth: 2,
+    borderColor: '#555',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1A3259',
+  },
+  addIconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCardText: {
+    color: '#bbb',
+    fontSize: 16,
+    marginTop: 8,
+    fontFamily: 'Tektur-Sub',
+  },
+  editButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 10,
+    backgroundColor: '#00000080',
+    borderRadius: 16,
+    padding: 4,
+  },
 });
 
 export default CardComponent;

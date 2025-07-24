@@ -1,3 +1,4 @@
+import { imageMap } from "@/assets/images/imageMap";
 
 // Table Object Props
 export type SavingAccount = {
@@ -6,14 +7,15 @@ export type SavingAccount = {
     balance: number;
     threshold: number;
     modifications: number;
+    image_uri: string | null;
 };
 
 export type CreditAccount = {
     id: number;
     name: string;
     current_balance: number;
-    true_balance: number;
     pending_charges: number;
+    image_uri: string | null;
 };
 
 export type RecExpenses = {
@@ -75,7 +77,7 @@ export interface SavingsCardProps {
     name: string;
     balance: number;
     threshold: number;
-    imageKey: string;
+    imageKey: string | null;
 }
 
 export interface CreditCardProps {
@@ -83,9 +85,8 @@ export interface CreditCardProps {
     id: number;
     name: string;
     current_balance: number;
-    true_balance: number;
     pending_charges: number;
-    imageKey: string;
+    imageKey: string | null;
 }
 
 export type PickerItem = {
@@ -93,4 +94,7 @@ export type PickerItem = {
     value: number;
 };
 
-export type CardComponentProps = SavingsCardProps | CreditCardProps;
+export type CardComponentProps =
+  | (SavingAccount & { type: 'savings'; imageKey: keyof typeof imageMap | string | null})
+  | (CreditAccount & { type: 'credit'; imageKey: keyof typeof imageMap | string | null})
+  | { type: 'add'; id: 'add' };

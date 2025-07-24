@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import React, { useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '@/styles/global';
@@ -9,11 +9,12 @@ import dataPost from '../database/dbPost';
 import dataRequest from '../database/dbReq';
 
 import {
+  CardComponentProps,
   CreditAccount,
   PlanExpenses,
   RecExpenses,
   RecIncome,
-  SavingAccount,
+  SavingAccount
 } from '@/types/typeDefs';
 
 import EmptyListNotice from '../components/global/EmptyListNotice';
@@ -22,11 +23,15 @@ import CardCarousel from '../components/homeScreen/carouselComponent';
 import PlannedExpensesList from '../components/tables/PlannedExpensesList';
 import RecurringExpensesList from '../components/tables/RecurringExpensesList';
 
+import Header from '../components/global/Header';
+import ModCardModal from '../components/homeScreen/modCard';
+import NewCardModal from '../components/homeScreen/newCard';
 import PaySingle from '../components/payButtons/spendModal';
 import PayRec from '../components/recPayButtons/recSpendModal';
 import RecurringIncomeTable from '../components/tables/RecurringIncomeTable';
 
 export default function HomeScreen() {
+
   const [savings, setSavings] = useState<SavingAccount[]>([]);
   const [credits, setCredits] = useState<CreditAccount[]>([]);
   const [recExpenses, setRecExpenses] = useState<RecExpenses[]>([]);
@@ -44,6 +49,11 @@ export default function HomeScreen() {
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [activeRecRecord, setActiveRecRecord] = useState<RecExpenses | null>(null);
   const [activePlanRecord, setActivePlanRecord] = useState<PlanExpenses | null>(null);
+  const [savingFormOpen, setSavingFormOpen] = useState<boolean>(false);
+  const [creditFormOpen, setCreditFormOpen] = useState<boolean>(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editCard, setEditCard] = useState<SavingAccount | CreditAccount | null>(null);
+  const [editCardType, setEditCardType] = useState<'savings' | 'credit' | null>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -80,17 +90,26 @@ export default function HomeScreen() {
     if (currentDate === 1) await dataPost.monthlyReset();
   }
 
-  const savingsWithImages = savings.map((item, idx) => ({
-    ...item,
-    type: 'savings' as const,
-    imageKey: ['blue', 'red'][idx % 2],
-  }));
+  const savingsCardEntry: CardComponentProps[] = [
+    ...savings.map((item, idx) => ({
+      ...item,
+      type: 'savings' as const,
+      imageKey: item.image_uri ? null : ['blue', 'red'][idx % 2],
+      image_uri: item.image_uri,
+    })),
+    { type: 'add', id: 'add' }
+  ];
 
-  const creditsWithImages = credits.map((item, idx) => ({
-    ...item,
-    type: 'credit' as const,
-    imageKey: ['bofa', 'venmo'][idx % 2],
-  }));
+  const creditsCardEntry: CardComponentProps[] = [
+    ...credits.map((item, idx) => ({
+      ...item,
+      type: 'credit' as const,
+      imageKey: item.image_uri ? null : ['blue', 'red'][idx % 2],
+      image_uri: item.image_uri,
+    })),
+    { type: 'add', id: 'add' }
+  ];
+
 
 
   const openRecModal = (record: RecExpenses) => {
@@ -101,6 +120,24 @@ export default function HomeScreen() {
   const openPlanModal = (record: PlanExpenses) => {
     setActivePlanRecord(record);
     setPlanModalOpen(true);
+  };
+
+  const openEditModal = (card: SavingAccount | CreditAccount, type: "savings" | "credit") => {
+    setEditCard(card);
+    setEditCardType(type);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setEditCard(null);
+    setEditCardType(null);
+  };
+
+  const refreshOnDelete = async () => {
+    setRefreshing(true);
+    await setupAndFetch();
+    setRefreshing(false);
   };
 
   const onRefresh = async () => {
@@ -116,40 +153,89 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollViewContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
       >
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Welcome Back</Text>
-          <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
-        </View>
+
+        <Header message="Your budget at a glance" />
 
         <View style={styles.innerContent}>
           <View style={styles.contentBox}>
-            {savingsWithImages.length === 0 ? (
+            {savingsCardEntry.length === 0 ? (
               <EmptyListNotice message="No Accounts Saved" />
             ) : (
-              <CardCarousel cardProp={savingsWithImages} />
+              <CardCarousel
+                cardProp={savingsCardEntry}
+                onAddCard={() => setSavingFormOpen(true)}
+                onEditCard={openEditModal} />
             )}
           </View>
+
           <View style={styles.contentBox}>
-            {creditsWithImages.length === 0 ? (
+            {creditsCardEntry.length === 0 ? (
               <EmptyListNotice message="No Credit Cards Saved" />
             ) : (
-              <CardCarousel cardProp={creditsWithImages} />
+              <CardCarousel
+                cardProp={creditsCardEntry}
+                onAddCard={() => setCreditFormOpen(true)}
+                onEditCard={openEditModal} />
             )}
           </View>
+
           <RecurringExpensesList
             data={recExpenses}
             month={month}
             onPay={openRecModal}
+            refreshOnDelete={refreshOnDelete}
           />
+
           <PlannedExpensesList
             data={planExpenses}
             onPay={openPlanModal}
             creditMap={creditMap}
             savingMap={savingMap}
+            refreshOnDelete={refreshOnDelete}
           />
-          <RecurringIncomeTable data={recIncome} refData={savingMap} />
+
+          <RecurringIncomeTable
+            data={recIncome}
+            refData={savingMap}
+            refreshOnDelete={refreshOnDelete}
+          />
+
         </View>
       </ScrollView>
+
+      <NewCardModal
+        accountType={'account'}
+        visible={savingFormOpen}
+        onClose={() => setSavingFormOpen(false)}
+        onSuccess={() => {
+          setSavingFormOpen(false);
+          onRefresh();
+        }}
+      />
+
+      <NewCardModal
+        accountType={'credit'}
+        visible={creditFormOpen}
+        onClose={() => setCreditFormOpen(false)}
+        onSuccess={() => {
+          setCreditFormOpen(false);
+          onRefresh();
+        }}
+      />
+
+      {editCard && editCardType && (
+        <ModCardModal
+          account={editCard}
+          accountType={editCardType}
+          visible={editModalVisible}
+          onClose={closeEditModal}
+          onSuccess={() => {
+            closeEditModal();
+            onRefresh(); // reload data after edit success
+          }}
+        />
+      )}
+
       {activeRecRecord && (
         <PayRec
           record={activeRecRecord}

@@ -1,7 +1,7 @@
 import { pickerStyles, styles } from '@/styles/global';
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import FormField from './FormField';
 
@@ -14,6 +14,25 @@ interface Props {
 }
 
 export default function FormPickerField({ control, name, label, items, placeholderLabel = "Select Option" }: Props) {
+
+  if (items.length === 0) {
+    return (
+      <FormField label={label}>
+        <View style={styles.pickerContainer}>
+          <Text style={{
+            color: "white",
+            paddingHorizontal: 14,
+            paddingVertical: 8,
+            fontFamily: "Tektur-Sub",
+            fontSize: 16
+          }}>
+            No Options Available
+          </Text>
+        </View>
+      </FormField>
+    )
+  }
+
   return (
     <FormField label={label}>
       <Controller

@@ -16,6 +16,7 @@ import {
 import initDB from '../database/dbInit';
 import accountRequest from '../database/dbReq';
 
+import Header from '../components/global/Header';
 import PaySingle from '../components/payButtons/spendModal';
 import PayRec from '../components/recPayButtons/recSpendModal';
 import SpendInsertModalForm from '../components/spendingScreen/SpendInsetModalForm';
@@ -71,6 +72,12 @@ export default function SpendingScreen() {
     setRefreshing(false);
   };
 
+  const refreshOnDelete = async () => {
+    setRefreshing(true);
+    await setupAndFetch();
+    setRefreshing(false);
+  };
+
   const openRecModal = (record: RecExpenses) => {
     setActiveRecRecord(record);
     setRecModalOpen(true);
@@ -88,21 +95,21 @@ export default function SpendingScreen() {
         contentContainerStyle={styles.scrollViewContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
       >
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Welcome Back</Text>
-          <Text style={styles.headerSubtitle}>Let's look at your finances</Text>
-        </View>
+
+        <Header message="See Your Spending" />
 
         <View style={styles.innerContent}>
           <TransactionList
             transactions={transactions}
             credit={credit}
             saving={saving}
+            refreshOnDelete={refreshOnDelete}
           />
 
           <RecurringExpensesList
             data={allReccuring}
             onPay={openRecModal}
+            refreshOnDelete={refreshOnDelete}
           />
 
           <PlannedExpensesList
@@ -110,6 +117,7 @@ export default function SpendingScreen() {
             onPay={openPlanModal}
             creditMap={credit}
             savingMap={saving}
+            refreshOnDelete={refreshOnDelete}
           />
         </View>
       </ScrollView>
