@@ -2,30 +2,30 @@ import db from "./dbOpen";
 
 export async function addNewAccount(name: string, balance: number, image_uri: string | null) {
 
-    await db.runAsync(`INSERT INTO saving_accounts (name, balance, image_uri) VALUES (?, ?, ?)`, 
+    await db.runAsync(`INSERT INTO saving_accounts (name, balance, image_uri) VALUES (?, ?, ?)`,
         [name, balance, image_uri]);
     console.log('New Account Added');
 }
 
 export async function addNewCredit(name: string, current_balance: number, image_uri: string | null) {
 
-    await db.runAsync(`INSERT INTO credit_accounts (name, current_balance, image_uri) VALUES (?, ?, ?)`, 
+    await db.runAsync(`INSERT INTO credit_accounts (name, current_balance, image_uri) VALUES (?, ?, ?)`,
         [name, current_balance, image_uri]);
     console.log('New Credit Card Added');
 }
 
 export async function updateSavingAccount(
     id: number,
-    name: string, 
+    name: string,
     balance: number,
     threshold: number,
     modifications: number,
     image_uri: string | null
-){
+) {
 
     await db.runAsync(`UPDATE saving_accounts 
         SET name = ?, balance = ?, threshold = ?, modifications = ?, image_uri = ? WHERE id = ?`,
-    [name, balance, threshold, modifications, image_uri, id])
+        [name, balance, threshold, modifications, image_uri, id])
 
     console.log('Saving Account Updated')
 
@@ -33,15 +33,15 @@ export async function updateSavingAccount(
 
 export async function updateCreditAccount(
     id: number,
-    name: string, 
+    name: string,
     current_balance: number,
     pending_charges: number,
     image_uri: string | null
-){
+) {
 
     await db.runAsync(`UPDATE credit_accounts 
         SET name = ?, current_balance = ?, pending_charges = ?, image_uri = ? WHERE id = ?`,
-    [name, current_balance, pending_charges, image_uri, id])
+        [name, current_balance, pending_charges, image_uri, id])
 
     console.log('Credit Card Updated')
 
@@ -102,11 +102,11 @@ export async function newSpend(
             const currentBal = Number(initBal.current_balance);
             const amt = Number(amount);
 
-            let newBalance 
-            if(type = 'credit_payment'){ // Payments deduct from balance
+            let newBalance
+            if (type = 'credit_payment') { // Payments deduct from balance
                 newBalance = currentBal - amt;
             }
-            else{ // Charges add to balance
+            else { // Charges add to balance
                 newBalance = currentBal + amt;
             }
 
@@ -139,10 +139,12 @@ export async function logRecSpend(
             throw new Error('No payment account ID specified')
         }
 
+
         await db.runAsync(
             `INSERT INTO transactions (name, type, amount, credited_to, transaction_date) VALUES (?, ?, ?, ?, ?)`,
             [name, type, Number(amount), credited_to, reccurring_date]);
 
+        console.log('reached')
 
         const initBal: { current_balance: number | string } | null = await db.getFirstAsync(
             'SELECT current_balance FROM credit_accounts WHERE id = ?', [credited_to]

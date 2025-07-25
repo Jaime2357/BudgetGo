@@ -1,18 +1,33 @@
 import { styles } from '@/styles/global';
 import { Income, RecIncome } from '@/types/typeDefs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import dataDrop from '@/app/database/dbDrop';
 import actions from '../actions';
+import EmptyListNotice from '../global/EmptyListNotice';
+import TableHeader from '../global/tableHeader';
 
 type IncomeSectionProps = {
   title: string;
   data: (Income | RecIncome)[];
   refreshOnDelete: () => void;
+  onFilterPress: () => void;
 };
 
-export default function IncomeSection({ title, data, refreshOnDelete }: IncomeSectionProps) {
+export default function IncomeSection({ title, data, refreshOnDelete, onFilterPress }: IncomeSectionProps) {
+
+  const [listedIncome, setListedIncome] = useState<(Income | RecIncome)[]>(data)
+  
+    useEffect(() => {
+      setListedIncome(data);
+    }, [data]);
+  
+    function onSearch(searchQuery?: string) {
+  
+      const searchResults = actions.searchFilter(data, searchQuery);
+      setListedIncome(searchResults);
+    }
 
   const onTransactionDelete = async (id: number) => {
 
@@ -51,16 +66,12 @@ export default function IncomeSection({ title, data, refreshOnDelete }: IncomeSe
   return (
     <View style={styles.tableContainer}>
       {data.length === 0 ? (
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>No {title}</Text>
-        </View>
+        <EmptyListNotice message="No Income" />
       ) : (
         <View>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>{title}</Text>
-          </View>
+          <TableHeader name=" Income" onSearch={onSearch} onFilterPress={onFilterPress}/>
           <ScrollView nestedScrollEnabled contentContainerStyle={{ paddingBottom: 40 }} style={{ flexGrow: 1 }}>
-            {data.map((item, idx) => (
+            {listedIncome.map((item, idx) => (
               <View key={item.id ?? idx} style={styles.tableRow}>
                 <View style={{ flexDirection: 'column', width: '50%' }}>
                   <Text style={styles.rowTextLeft}>{item.name}:</Text>

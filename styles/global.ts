@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
@@ -83,7 +83,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(74, 144, 226, 0.18)",
   },
   tableHeaderText: {
-    fontSize: 20,
+    fontSize: 25,
     fontFamily: "Tektur-Head",
     color: "white",
   },
@@ -109,6 +109,34 @@ export const styles = StyleSheet.create({
     color: "white",
     marginVertical: 2,
     textAlign: "right",
+  },
+
+  searchBarSection: {
+    paddingHorizontal: 25,
+    paddingBottom: 10,
+    backgroundColor: "rgba(74, 144, 226, 0.18)"
+  },
+  searchBar: {
+    backgroundColor: "#2323238c",
+    borderColor: "rgba(20, 30, 43, 0.13)",
+    borderRadius: 20,
+    color: "white",
+    paddingHorizontal: 14,
+    fontFamily: "Tektur-Sub",
+    width: '100%',
+    height: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10
+  },
+  searchBarInput: {
+    fontSize: 15,
+    fontFamily: "Tektur-Sub",
+    color: "white",
+    alignSelf: 'flex-start',
+    width: '90%',
+    //height: 30,
+    margin: 'auto'
   },
 
   tableButton: {
@@ -304,6 +332,106 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     textAlign: "center",
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalContainer: {
+    backgroundColor: "#181818",
+    borderRadius: 24,
+    width: "92%",
+    maxHeight: "92%",
+    alignSelf: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.16,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 28,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontWeight: "bold",
+    fontFamily: "Tektur-Head",
+    fontSize: 19,
+    marginBottom: 10,
+    marginTop: 2,
+    color: "#aad1fa",
+    textAlign: "center",
+  },
+  sectionLabel: {
+    fontWeight: "600",
+    fontFamily: "Tektur-Sub",
+    fontSize: 15,
+    marginBottom: 6,
+    marginTop: 13,
+    color: "#aad1fa",
+  },
+  input: {
+    backgroundColor: "#232323",
+    borderWidth: 1,
+    borderColor: "rgba(74, 144, 226, 0.18)",
+    borderRadius: 10,
+    color: "white",
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === "ios" ? 11 : 7,
+    margin: 8,
+    fontFamily: "Tektur-Sub",
+    fontSize: 16,
+    width: 110,
+  },
+  sortOrderButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#aaa",
+    marginHorizontal: 8,
+    marginTop: 6,
+    width: 120,
+    alignItems: 'center',
+    backgroundColor: "#222",
+  },
+  sortOrderButtonSelected: {
+    backgroundColor: "#1EB1FC",
+    borderColor: "#1EB1FC",
+  },
+  sortOrderText: {
+    color: "#aad1fa",
+    fontWeight: "600",
+    fontFamily: "Tektur-Sub",
+    fontSize: 15,
+  },
+  sortOrderTextSelected: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontFamily: "Tektur-Head",
+    fontSize: 15,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    marginTop: 18,
+    marginVertical: 15,
+  },
+  button: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+    fontFamily: "Tektur-Head",
+  },
+
 });
 
 export const pickerStyles = {
@@ -364,5 +492,148 @@ export const modalStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalContainer: {
+    backgroundColor: "#181818",
+    borderRadius: 24,
+    width: "92%",
+    maxHeight: "92%",
+    alignSelf: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.16,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 28,
+    elevation: 10,
+  },
 
+  modalTitle: {
+    fontWeight: "bold",
+    fontFamily: "Tektur-Head",
+    fontSize: 19,
+    marginBottom: 10,
+    marginTop: 2,
+    color: "#aad1fa",
+    textAlign: "center",
+  },
+
+  sectionLabel: {
+    fontWeight: "600",
+    fontFamily: "Tektur-Sub",
+    fontSize: 15,
+    marginBottom: 6,
+    marginTop: 13,
+    color: "#aad1fa",
+  },
+
+  input: {
+    backgroundColor: "#232323",
+    borderWidth: 1,
+    borderColor: "rgba(74, 144, 226, 0.18)",
+    borderRadius: 10,
+    color: "white",
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === "ios" ? 11 : 7,
+    margin: 8,
+    fontFamily: "Tektur-Sub",
+    fontSize: 16,
+    width: 110,
+  },
+
+  pickerFlat: {
+    color: 'white',
+    fontFamily: 'Tektur',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#333',
+    borderRadius: 8,
+    backgroundColor: '#232323',
+    color: 'white',
+    width: 140, // lower container width
+    minHeight: 36,
+    alignSelf: "flex-start", // avoid stretching to full row
+    justifyContent: "center",
+    marginVertical: 5,
+  },
+
+  // Horizontal row for amount inputs and date picker rows
+  modalFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 6,
+  },
+
+  // Date text style for better contrast
+  dateDisplayText: {
+    color: '#ffeb7a', // bright yellow for good contrast
+    fontFamily: 'Tektur-Head',
+    fontSize: 16,
+    paddingHorizontal: 10,
+  },
+
+  // Button container - center and space buttons horizontally
+  modalButtonGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+
+  sortOrderButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#aaa",
+    marginHorizontal: 8,
+    marginTop: 6,
+    backgroundColor: "#222",
+  },
+  sortOrderButtonSelected: {
+    backgroundColor: "#1EB1FC",
+    borderColor: "#1EB1FC",
+  },
+  sortOrderText: {
+    color: "#aad1fa",
+    fontWeight: "600",
+    fontFamily: "Tektur-Sub",
+    fontSize: 15,
+  },
+  sortOrderTextSelected: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontFamily: "Tektur-Head",
+    fontSize: 15,
+  },
+
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 18,
+    marginVertical: 15,
+  },
+  button: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+    fontFamily: "Tektur-Head",
+  },
 });
+
+export const pickerFlatStyle = {
+  color: 'white',
+  fontSize: 16,
+  paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+  paddingHorizontal: 10,
+  fontFamily: 'Tektur',
+  backgroundColor: '#232323',
+};

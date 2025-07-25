@@ -1,23 +1,39 @@
 import dataDrop from '@/app/database/dbDrop';
 import { styles } from '@/styles/global';
 import { RecIncome, SavingAccount } from '@/types/typeDefs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import actions from '../actions';
+import EmptyListNotice from '../global/EmptyListNotice';
+import TableHeader from '../global/tableHeader';
 
 type RecurringIncomeTableProps = {
   data: RecIncome[];
   refData: Map<number, SavingAccount>;
   title?: string; // Optional custom title
   refreshOnDelete: () => void;
+  onFilterPress: () => void;
 };
 
 export default function RecurringIncomeTable({
   data,
   refData,
   title = 'Recurring Income',
-  refreshOnDelete
+  refreshOnDelete,
+  onFilterPress
 }: RecurringIncomeTableProps) {
+
+  const [listedRecIncome, setListedRecIncome] = useState<RecIncome[]>(data)
+
+  useEffect(() => {
+    setListedRecIncome(data);
+  }, [data]);
+
+  function onSearch(searchQuery?: string) {
+
+    const searchResults = actions.searchFilter(data, searchQuery);
+    setListedRecIncome(searchResults);
+  }
 
   const onRecIncomeDelete = async (id: number) => {
 
@@ -57,16 +73,12 @@ export default function RecurringIncomeTable({
   return (
     <View style={styles.tableContainer}>
       {data.length === 0 ? (
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>No {title}</Text>
-        </View>
+        <EmptyListNotice message="No Monthly Income" />
       ) : (
         <>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>{title}</Text>
-          </View>
+          <TableHeader name="Reccurring Income" onSearch={onSearch} onFilterPress={onFilterPress}/>
           <ScrollView nestedScrollEnabled contentContainerStyle={{ paddingBottom: 40 }} style={{ flexGrow: 1 }}>
-            {data.map((income) => (
+            {listedRecIncome.map((income) => (
               <View key={income.id} style={styles.tableRow}>
                 <View style={{ flexDirection: 'column', width: '50%' }}>
                   <Text style={styles.rowTextLeft}>{income.name}:</Text>
@@ -79,7 +91,7 @@ export default function RecurringIncomeTable({
                     <View>
                       <Text style={styles.rowTextRight}>
                         Received {income.expected_date}{actions.getOrdinalSuffix(income.expected_date)}
-                        </Text>
+                      </Text>
                       <TouchableOpacity
                         onPress={() => onRecIncomeDelete(income.id)}
                         style={[styles.tableButton, { backgroundColor: '#cc4444', alignSelf: 'flex-end' }]}
@@ -91,7 +103,7 @@ export default function RecurringIncomeTable({
                     <View>
                       <Text style={styles.rowTextRight}>
                         {income.expected_date}{actions.getOrdinalSuffix(income.expected_date)}
-                        </Text>
+                      </Text>
                       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 }}>
                         {/* Log Button */}
                         <TouchableOpacity

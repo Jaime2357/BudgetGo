@@ -1,10 +1,11 @@
 import dataDrop from '@/app/database/dbDrop';
 import { styles } from '@/styles/global';
 import { PlanExpenses } from '@/types/typeDefs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import actions from '../actions';
 import EmptyListNotice from '../global/EmptyListNotice';
+import TableHeader from '../global/tableHeader';
 
 interface Props {
   data: PlanExpenses[];
@@ -12,10 +13,23 @@ interface Props {
   creditMap?: Map<number, any>;
   savingMap?: Map<number, any>;
   refreshOnDelete: () => void;
+  onFilterPress: () => void;
 }
 
-export default function PlannedExpensesList({ data, onPay, creditMap, savingMap, refreshOnDelete }: Props) {
+export default function PlannedExpensesList({ data, onPay, creditMap, savingMap, refreshOnDelete, onFilterPress }: Props) {
 
+  const [listedPlanExpenses, setListedPlanExpenses] = useState<PlanExpenses[]>(data)
+  
+    useEffect(() => {
+      setListedPlanExpenses(data);
+    }, [data]);
+  
+    function onSearch(searchQuery?: string) {
+  
+      const searchResults = actions.searchFilter(data, searchQuery);
+      setListedPlanExpenses(searchResults);
+    }
+    
   const onPlanExpenseDelete = async (id: number) => {
 
     Alert.alert(
@@ -56,10 +70,8 @@ export default function PlannedExpensesList({ data, onPay, creditMap, savingMap,
         <EmptyListNotice message="No Planned Expenses" />
       ) : (
         <>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>Planned Expenses</Text>
-          </View>
-          {data.map((expense) => (
+          <TableHeader name='Planned Expenses' onSearch={onSearch} onFilterPress={onFilterPress}/>
+          {listedPlanExpenses.map((expense) => (
             <View key={expense.id} style={styles.tableRow}>
               <View style={{ flexDirection: 'column', width: '50%' }}>
                 <Text style={styles.rowTextLeft}>{expense.name}:</Text>

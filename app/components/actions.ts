@@ -67,31 +67,184 @@ export const getSavingName = (saving: Map<number, SavingAccount>, id?: number | 
 // Get Ordinal Suffix
 
 export function getOrdinalSuffix(n: number) {
-  const tens = n % 100;
-  if (tens >= 11 && tens <= 13) return 'th';
-  switch (n % 10) {
-    case 1: return 'st';
-    case 2: return 'nd';
-    case 3: return 'rd';
-    default: return 'th';
-  }
+    const tens = n % 100;
+    if (tens >= 11 && tens <= 13) return 'th';
+    switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
 }
 
 // Get Time of Day Identifier
-export function getTimeOfDay(){
+export function getTimeOfDay() {
 
     const today = new Date();
     const time = today.getHours();
 
-    if (time >= 0 && time <= 11){
-      return 'Morning';
+    if (time >= 0 && time <= 11) {
+        return 'Morning';
     }
-    else if (time >= 12 && time <= 17){
-      return 'Afternoon';
+    else if (time >= 12 && time <= 17) {
+        return 'Afternoon';
     }
-    else{
-      return 'Evening';
+    else {
+        return 'Evening';
     }
+}
+
+// Search, Sort and Filter helpers
+
+export function searchFilter<Data extends { name: string }>(
+    data: Data[],
+    query?: string
+): Data[] {
+    if (!query) return data;
+
+    const lowercaseQuery = query.toLowerCase();
+
+    return data.filter(item =>
+        item.name.toLowerCase().includes(lowercaseQuery)
+    )
+}
+
+export function normalizeDate(value: any): number {
+    if (!value) return 0;
+    if (value instanceof Date) return value.getTime();
+
+    if (typeof value === 'number') {
+        // day of month (1-31) to fixed epoch date
+        if (value > 0 && value <= 31) {
+            return new Date(1970, 0, value).getTime();
+        }
+        // assume timestamp in ms
+        return value;
+    }
+
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+}
+
+interface FilterParams {
+  type?: string;
+  amountMin?: number;
+  amountMax?: number;
+  dateField?: keyof any;
+  dateMin?: Date | string | number;
+  dateMax?: Date | string | number;
+}
+
+
+function filterData<D extends object>(data: D[], filters: FilterParams): D[] {
+  const {
+    type,
+    amountMin,
+    amountMax,
+    dateField,
+    dateMin,
+    dateMax,
+  } = filters;
+
+  return data.filter(item => {
+    if (type && (item as any).type !== type) return false;
+
+    const amount = Number((item as any).amount);
+    if (isNaN(amount)) return false;
+    if (amountMin !== undefined && amount < amountMin) return false;
+    if (amountMax !== undefined && amount > amountMax) return false;
+
+    if (dateField && (item as any)[dateField] !== undefined) {
+      const itemDate = normalizeDate((item as any)[dateField]);
+      const minTimestamp = dateMin ? normalizeDate(dateMin) : -Infinity;
+      const maxTimestamp = dateMax ? normalizeDate(dateMax) : Infinity;
+      if (itemDate < minTimestamp || itemDate > maxTimestamp) return false;
+    }
+
+    return true;
+  });
+}
+
+
+
+export function sortByField<D>(
+    data: D[],
+    field: keyof D,
+    ascending: boolean
+): D[] {
+
+    const normalizeDate = (value: any): number => {
+        if (value === undefined || value === null) return 0;
+
+        if (value instanceof Date) {
+            return value.getTime();
+        }
+
+        if (typeof value === 'number') {
+
+            if (value > 0 && value <= 31) {
+                return new Date(1970, 0, value).getTime();
+            }
+            return value;
+        }
+
+        if (typeof value === 'string') {
+            const date = new Date(value);
+            return isNaN(date.getTime()) ? 0 : date.getTime();
+        }
+
+        return 0;
+    }
+
+    const compare = (a: any, b: any): number => {
+        if (a === null && b === null) return 0;
+        if (a === null) return -1;
+        if (b === null) return 1;
+
+        if (field === 'reccurring_date') {
+            if (typeof a === 'number' && typeof b === 'number') {
+                return a - b;
+            }
+            // Fallback to normalized dates if types differ
+            const aDate = normalizeDate(a);
+            const bDate = normalizeDate(b);
+            return aDate - bDate;
+        }
+
+
+        if (field.toString().toLowerCase().includes('date')
+            || field === 'expected_date'
+            || field === 'paid_date' || field === 'transaction_date') {
+            const aDate = normalizeDate(a);
+            const bDate = normalizeDate(b);
+            return aDate - bDate;
+        }
+
+
+        if (typeof a === 'boolean' && typeof b === 'boolean') {
+            return (a === b) ? 0 : a ? 1 : -1;
+        }
+
+        if (typeof a === 'number' && typeof b === 'number') {
+            return a - b
+        }
+
+        const aStr = String(a).toLowerCase();
+        const bStr = String(b).toLowerCase();
+
+        return aStr.localeCompare(bStr);
+    };
+
+    const sorted = [...data].sort((itemA, itemB) => {
+        const valA = itemA[field];
+        const valB = itemB[field];
+        const compResult = compare(valA, valB);
+
+        return ascending ? compResult : - compResult;
+    });
+
+    return sorted;
+
 }
 
 export default {
@@ -100,5 +253,9 @@ export default {
     getFullDate,
     handleLogClick,
     getOrdinalSuffix,
-    getTimeOfDay
+    getTimeOfDay,
+    searchFilter,
+    filterData,
+    sortByField,
+    normalizeDate
 }

@@ -1,20 +1,34 @@
 import { styles } from '@/styles/global';
 import { RecExpenses } from '@/types/typeDefs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import EmptyListNotice from '../global/EmptyListNotice';
 
 import dataDrop from '@/app/database/dbDrop';
 import actions from '../actions';
+import TableHeader from '../global/tableHeader';
 
 interface Props {
   data: RecExpenses[];
   month?: string; // optional, used on HomeScreen
   onPay: (entry: RecExpenses) => void;
   refreshOnDelete: () => void;
+  onFilterPress: () => void;
 }
 
-export default function RecurringExpensesList({ data, month, onPay, refreshOnDelete }: Props) {
+export default function RecurringExpensesList({ data, month, onPay, refreshOnDelete, onFilterPress }: Props) {
+
+  const [listedRecExpenses, setListedRecExpenses] = useState<RecExpenses[]>(data)
+
+  useEffect(() => {
+    setListedRecExpenses(data);
+  }, [data]);
+
+  function onSearch(searchQuery?: string) {
+
+    const searchResults = actions.searchFilter(data, searchQuery);
+    setListedRecExpenses(searchResults);
+  }
 
   const onRecExpenseDelete = async (id: number) => {
 
@@ -58,16 +72,12 @@ export default function RecurringExpensesList({ data, month, onPay, refreshOnDel
       ) : (
         <>
           {month && (
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>{month} Expenses</Text>
-            </View>
+            <TableHeader name={month + ' Expenses'} onSearch={onSearch} onFilterPress={onFilterPress}/>
           )}
           {!month && (
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Recurring Expenses</Text>
-            </View>
+            <TableHeader name='Reccurring Expenses' onSearch={onSearch} onFilterPress={onFilterPress}/>
           )}
-          {data.map((expense) => (
+          {listedRecExpenses.map((expense) => (
             <View key={expense.id} style={styles.tableRow}>
               <View style={{ flexDirection: 'column', width: '50%' }}>
                 <Text style={styles.rowTextLeft}>{expense.name}:</Text>
@@ -76,16 +86,19 @@ export default function RecurringExpensesList({ data, month, onPay, refreshOnDel
               <View style={{ flexDirection: 'column', width: '50%' }}>
                 <Text style={styles.rowTextRight}>
                   Due {expense.reccurring_date}{actions.getOrdinalSuffix(expense.reccurring_date)}
-                  </Text>
+                </Text>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 }}>
+
                   {/* Pay Button */}
-                  <TouchableOpacity
-                    onPress={() => onPay(expense)}
-                    style={styles.tableButton}
-                  >
-                    <Text style={styles.tableButtonText}>Pay</Text>
-                  </TouchableOpacity>
+                  {!expense.paid_for_month && (
+                    < TouchableOpacity
+                      onPress={() => onPay(expense)}
+                      style={styles.tableButton}
+                    >
+                      <Text style={styles.tableButtonText}>Pay</Text>
+                    </TouchableOpacity>
+                  )}
 
                   {/* Delete Button */}
                   <TouchableOpacity
@@ -100,7 +113,8 @@ export default function RecurringExpensesList({ data, month, onPay, refreshOnDel
             </View>
           ))}
         </>
-      )}
-    </View>
+      )
+      }
+    </View >
   );
 }

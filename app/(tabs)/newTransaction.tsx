@@ -144,7 +144,7 @@ export default function NewTransaction() {
                 contentContainerStyle={styles.scrollViewContainer}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}
             >
-                
+
                 <Header message="Log a New Transaction" />
 
                 <View style={styles.formCard}>
